@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+   <TemplateData>
+      <Name>NuGet Package</Name>
+      <Description>NuGet package project</Description>
+      <Icon>NuGet.ico</Icon>
+      <ProjectType>NuGet</ProjectType>
+      <DefaultName>Package</DefaultName>
+      <ProvideDefaultName>true</ProvideDefaultName>
+   </TemplateData>
+   <TemplateContent>
+      <Project File="NuGet.nuproj" ReplaceParameters="true">
+         <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$.nuspec">NuGet.nuspec</ProjectItem>
+      </Project>
+   </TemplateContent>
+</VSTemplate>
