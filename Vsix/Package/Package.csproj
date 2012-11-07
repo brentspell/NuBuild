@@ -114,6 +114,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\..\Build\NuBuild.targets">
+      <Link>Resources\NuBuild.targets</Link>
+    </EmbeddedResource>
     <None Include="Key.snk" />
   </ItemGroup>
   <ItemGroup>

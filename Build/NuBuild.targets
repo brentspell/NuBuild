@@ -9,8 +9,13 @@
    <Import Project="NuBuild.tasks" />
    <!-- NuBuild Targets -->
    <Target Name="Clean">
+      <ItemGroup>
+         <__CleanPackage Include="$(OutputPath)*.nupkg"/>
+      </ItemGroup>
+      <Delete Files="@(__CleanPackage)"/>
    </Target>
    <Target Name="Build">
+      <NuPack NuSpec="@(Compile)" OutputPath="$(OutputPath)"/>
    </Target>
    <Target Name="Rebuild" DependsOnTargets="Clean;Build;">
    </Target>

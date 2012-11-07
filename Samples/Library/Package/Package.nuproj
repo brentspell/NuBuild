@@ -1,10 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{4625D6C1-4365-40F9-B873-39116B43BF35}</ProjectGuid>
     <OutputPath>..\..\Bin\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'"></PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'"></PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Library.nuspec"/>
+    <Content Include="license.txt">
+      <SubType>Content</SubType>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\NuBuild\v1\NuBuild.targets" />
 </Project>

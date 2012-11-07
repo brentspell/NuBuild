@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.ComponentModel.Design;
 using Microsoft.Win32;
@@ -29,11 +31,7 @@ namespace NuBuild.Vsix
       public const String PackageGuidString = "d2ab0959-d15b-4e44-8a06-c999cc386e34";
       public static readonly Guid PackageGuid = new Guid(PackageGuidString);
 
-      public NuBuildPackage ()
-      {
-      }
-
-      #region ProjectPackage Implementation
+      #region ProjectPackage Overrides
       protected override void Initialize ()
       {
          base.Initialize();

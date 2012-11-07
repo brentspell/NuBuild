@@ -1,3 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+   <!-- Build Task: NuPack
+        NuGet package task
+     -->
+   <UsingTask TaskName="NuPack" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+      <ParameterGroup>
+         <NuSpec ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true"/>
+         <OutputPath ParameterType="System.String" Required="true"/>
+      </ParameterGroup>
+      <Task>
+         <Reference Include="NuGet.Core"/>
+         <Using Namespace="System.IO"/>
+         <Using Namespace="System.Linq"/>
+         <Code Type="Fragment" Language="cs"><![CDATA[
+            var specItem = NuSpec.Single();
+            var specPath = specItem.GetMetadata("FullPath");
+            var pkgBuilder = (NuGet.PackageBuilder)null;
+            using (var specStream = new FileStream(specPath, FileMode.Open, FileAccess.Read))
+               pkgBuilder = new NuGet.PackageBuilder(
+                  specStream,
+                  Path.GetDirectoryName(specPath)
+               );
+            var pkgPath = Path.Combine(
+               OutputPath,
+               String.Format("{0}.{1}.nupkg", pkgBuilder.Id, pkgBuilder.Version)
+            );
+            Log.LogMessage(MessageImportance.High, "{0} -> {1}", Path.GetFileName(specPath), pkgPath);
+            using (var pkgFile = new FileStream(pkgPath, FileMode.Create, FileAccess.Read | FileAccess.Write))
+               pkgBuilder.Save(pkgFile);
+         ]]></Code>
+      </Task>
+   </UsingTask>
 </Project>
