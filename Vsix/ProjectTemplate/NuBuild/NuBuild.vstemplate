@@ -3,14 +3,14 @@
    <TemplateData>
       <Name>NuGet Package</Name>
       <Description>NuGet package project</Description>
-      <Icon>NuGet.ico</Icon>
+      <Icon>NuBuild.ico</Icon>
       <ProjectType>NuGet</ProjectType>
       <DefaultName>Package</DefaultName>
       <ProvideDefaultName>true</ProvideDefaultName>
    </TemplateData>
    <TemplateContent>
-      <Project File="NuGet.nuproj" ReplaceParameters="true">
-         <ProjectItem ReplaceParameters="true" TargetFileName="$safeprojectname$.nuspec">NuGet.nuspec</ProjectItem>
+      <Project File="NuBuild.nuproj" ReplaceParameters="true">
+         <ProjectItem ReplaceParameters="true" TargetFileName="$projectname$.nuspec">NuBuild.nuspec</ProjectItem>
       </Project>
    </TemplateContent>
 </VSTemplate>

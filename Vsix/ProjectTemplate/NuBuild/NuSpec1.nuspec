@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-16"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+   <metadata>
+      <id>$safeprojectname$</id>
+      <version>1.0.0</version>
+      <title>$safeprojectname$</title>
+      <authors>Brent M. Spell</authors>
+      <owners>Brent M. Spell</owners>
+      <licenseUrl></licenseUrl>
+      <projectUrl></projectUrl>
+      <iconUrl></iconUrl>
+      <requireLicenseAcceptance>false</requireLicenseAcceptance>
+      <description></description>
+      <summary></summary>
+      <tags></tags>
+      <frameworkAssemblies>
+         <frameworkAssembly assemblyName="System" targetFramework=".NETFramework4.0" />
+      </frameworkAssemblies>
+   </metadata>
+   <files>
+   </files>
+</package>

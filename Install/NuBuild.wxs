@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- See http://stackoverflow.com/questions/471424/wix-tricks-and-tips -->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+   <?define ProductVersion = "1.0.1"?>
+   <Product Id="*"
+      UpgradeCode="1948F590-CD4C-4279-9466-5A172FEA8FCE"
+      Name="NuBuild" 
+      Version="$(var.ProductVersion)" 
+      Manufacturer="Brent M. Spell"
+      Language="1033">
+      <Package 
+         Description="NuGet build framework and project templates" 
+         Compressed="yes"
+         InstallPrivileges="elevated"/>
+      <MediaTemplate EmbedCab="yes"/>
+      <Directory Id="TARGETDIR" Name="SourceDir">
+         <Directory Id="ProgramFilesFolder" Name="ProgFile">
+            <Directory Id="MSBuildFolder" Name="MSBuild">
+               <Directory Id="INSTALLFOLDER" Name="NuBuild">
+                  <Directory Id="NuBuildV1Folder" Name="v1"/>
+               </Directory>
+            </Directory>
+         </Directory>
+      </Directory>
+      <Feature Id="All" 
+         Title="NuBuild" 
+         Description="NuGet build framework and project templates"
+         ConfigurableDirectory="INSTALLFOLDER">
+         <ComponentGroupRef Id="Product.Generated"/>
+         <Component Id="NuBuild_targets" Guid="*" Directory="NuBuildV1Folder">
+            <File Id="NuBuild_targets" Source="..\MSBuild\NuBuild.targets"/>
+         </Component>
+         <Component Id="NuBuild_tasks" Guid="*" Directory="NuBuildV1Folder">
+            <File Id="NuBuild_tasks" Source="..\MSBuild\NuBuild.tasks"/>
+         </Component>
+         <Component Id="NuBuild_vsix" Guid="*" Directory="NuBuildV1Folder">
+            <File Id="NuBuild_vsix" Source="..\Bin\NuBuild.vsix"/>
+         </Component>
+      </Feature>
+      <MajorUpgrade
+         AllowSameVersionUpgrades="yes"
+         DowngradeErrorMessage="Downgrading is not supported."/>
+      <!-- Custom Actions -->
+      <SetProperty Id="ARPINSTALLLOCATION" 
+         Value="[INSTALLFOLDER]"
+         After="CostFinalize"/>
+      <Property Id="VSINSTALLDIR">
+         <RegistrySearch 
+            Id="VSInstallRegistry" 
+            Root="HKLM" 
+            Key="SOFTWARE\Microsoft\VisualStudio\10.0" 
+            Name="InstallDir" 
+            Type="directory" />
+      </Property>
+      <CustomAction 
+         Id="SetVsixInstaller" 
+         Return="check" 
+         Execute="immediate" 
+         Property="VsixInstaller" 
+         Value="[VSINSTALLDIR]VsixInstaller.exe" />
+      <CustomAction
+         Id="RemoveVsix"
+         Property="VsixInstaller"
+         Execute="deferred"
+         Impersonate="no"
+         ExeCommand=" /u:d4cda160-3cb8-4614-a9ed-f845cb2ddc64 /quiet" 
+         Return="asyncWait"/>
+      <CustomAction 
+         Id="DeployVsix" 
+         Property="VsixInstaller" 
+         Execute="deferred" 
+         Impersonate="no" 
+         ExeCommand=" &quot;[#NuBuild_vsix]&quot; /quiet" />
+      <InstallExecuteSequence>
+         <Custom Action="SetVsixInstaller" After="ValidateProductID">VsixInstaller=""</Custom>
+         <Custom Action="RemoveVsix" After="MsiPublishAssemblies"/>
+         <Custom Action="DeployVsix" After="RemoveVsix">NOT (REMOVE="ALL")</Custom>
+      </InstallExecuteSequence>
+   </Product>
+</Wix>

@@ -28,7 +28,7 @@ namespace NuBuild.Vsix
    ]
    public sealed class NuBuildPackage : ProjectPackage
    {
-      public const String PackageGuidString = "d2ab0959-d15b-4e44-8a06-c999cc386e34";
+      public const String PackageGuidString = "e09dd79a-4488-4ab9-8d3f-a7eee78bf432";
       public static readonly Guid PackageGuid = new Guid(PackageGuidString);
 
       #region ProjectPackage Overrides

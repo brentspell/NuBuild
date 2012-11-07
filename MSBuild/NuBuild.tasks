@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+   <!-- Build Task: NuPack
+        NuGet package compile task
+     -->
+   <UsingTask TaskName="NuPack" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+      <ParameterGroup>
+         <NuSpec ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true"/>
+         <OutputPath ParameterType="System.String" Required="true"/>
+      </ParameterGroup>
+      <Task>
+         <Reference Include="NuGet.Core"/>
+         <Using Namespace="System.IO"/>
+         <Using Namespace="System.Linq"/>
+         <Code Type="Fragment" Language="cs"><![CDATA[
+            foreach (var specItem in NuSpec)
+            {
+               try
+               {
+                  var specPath = specItem.GetMetadata("FullPath");
+                  var pkgBuilder = (NuGet.PackageBuilder)null;
+                  using (var specStream = new FileStream(specPath, FileMode.Open, FileAccess.Read))
+                     pkgBuilder = new NuGet.PackageBuilder(
+                        specStream,
+                        Path.GetDirectoryName(specPath)
+                     );
+                  var pkgPath = Path.Combine(
+                     OutputPath,
+                     String.Format("{0}.{1}.nupkg", pkgBuilder.Id, pkgBuilder.Version)
+                  );
+                  Log.LogMessage(MessageImportance.High, "{0} -> {1}", Path.GetFileName(specPath), pkgPath);
+                  using (var pkgFile = new FileStream(pkgPath, FileMode.Create, FileAccess.Read | FileAccess.Write))
+                     pkgBuilder.Save(pkgFile);
+               }
+               catch (Exception e)
+               {
+                  Log.LogError(e.Message);
+               }
+            }
+         ]]></Code>
+      </Task>
+   </UsingTask>
+   <!-- Build Task: NuClean
+        NuGet package clean task
+     -->
+   <UsingTask TaskName="NuClean" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+      <ParameterGroup>
+         <NuSpec ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true"/>
+         <OutputPath ParameterType="System.String" Required="true"/>
+      </ParameterGroup>
+      <Task>
+         <Reference Include="NuGet.Core"/>
+         <Using Namespace="System.IO"/>
+         <Using Namespace="System.Linq"/>
+         <Code Type="Fragment" Language="cs">
+            <![CDATA[
+            foreach (var specItem in NuSpec)
+            {
+               try
+               {
+                  var specPath = specItem.GetMetadata("FullPath");
+                  var pkgBuilder = (NuGet.PackageBuilder)null;
+                  using (var specStream = new FileStream(specPath, FileMode.Open, FileAccess.Read))
+                     pkgBuilder = new NuGet.PackageBuilder(
+                        specStream,
+                        Path.GetDirectoryName(specPath)
+                     );
+                  var pkgPath = Path.Combine(
+                     OutputPath,
+                     String.Format("{0}.{1}.nupkg", pkgBuilder.Id, pkgBuilder.Version)
+                  );
+                  if (File.Exists(pkgPath))
+                  {
+                     Log.LogMessage(MessageImportance.High, "Deleting {0}", pkgPath);
+                     File.Delete(pkgPath);
+                  }
+               }
+               catch (Exception e)
+               {
+                  Log.LogError(e.Message);
+               }
+            }
+         ]]>
+         </Code>
+      </Task>
+   </UsingTask>
+   <!-- Build Task: NuVersion
+        NuGet package version increment task
+     -->
+   <UsingTask TaskName="NuVersion" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+      <ParameterGroup>
+         <NuSpec ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true"/>
+      </ParameterGroup>
+      <Task>
+         <Reference Include="NuGet.Core"/>
+         <Reference Include="System.Xml"/>
+         <Reference Include="System.Xml.Linq"/>
+         <Using Namespace="System.IO"/>
+         <Using Namespace="System.Linq"/>
+         <Using Namespace="System.Xml.Linq"/>
+         <Code Type="Fragment" Language="cs">
+            <![CDATA[
+            foreach (var specItem in NuSpec)
+            {
+               try
+               {
+                  var specPath = specItem.GetMetadata("FullPath");
+                  var doc = XDocument.Load(specPath);
+                  var elem = doc
+                     .Root
+                     .Elements()
+                     .Single(e => e.Name.LocalName == "metadata")
+                     .Elements()
+                     .Single(e => e.Name.LocalName == "version");
+                  var ver = new NuGet.SemanticVersion(elem.Value).Version;
+                  ver = new Version(ver.Major, ver.Minor, ver.Build + 1);
+                  elem.Value = new NuGet.SemanticVersion(ver).ToString();
+                  doc.Save(specPath);
+               }
+               catch (Exception e)
+               {
+                  Log.LogError(e.Message);
+               }
+            }
+         ]]>
+         </Code>
+      </Task>
+   </UsingTask>
+</Project>
