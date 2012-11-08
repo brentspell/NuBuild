@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+   <!-- NuBuild Tasks -->
+   <Import Project="NuBuild.tasks" />
+   <!-- NuBuild Properties -->
+   <PropertyGroup>
+      <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+      <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+      <!-- Property: NuBuildVersionSource
+         . specifies whether/how the package version string is generated
+         . Manual:   (default) manage in .nuspec file by hand
+         . Library:  retrieve from a library referenced by the package
+         . Auto:     generate from a build number file
+      -->
+      <NuBuildVersionSource Condition="'$(NuBuildVersionSource)' == ''">Manual</NuBuildVersionSource>
+   </PropertyGroup>
+   <!-- Target: Prepare 
+      . initializes the Compile build items, adding custom metadata
+      . generates the NuSources and NuTargets items for incremental building
+   -->
+   <Target Name="__Prepare">
+      <MSBuild Projects="@(ProjectReference)" UseResultsCache="true">
+         <Output TaskParameter="TargetOutputs" ItemName="__ReferenceLibraries" />
+      </MSBuild>
+      <NuPrepare NuSpec="@(Compile)"
+                 ProjectName="$(MSBuildProjectName)"
+                 VersionSource="$(NuBuildVersionSource)"
+                 OutputPath="$(OutputPath)"
+                 BuildNumber="$(BuildNumber)"
+                 ReferenceLibraries="@(__ReferenceLibraries)">
+         <Output TaskParameter="NuSpec" ItemName="NuPrepared"/>
+         <Output TaskParameter="Sources" ItemName="NuSources"/>
+         <Output TaskParameter="Targets" ItemName="NuTargets"/>
+      </NuPrepare>
+      <ItemGroup>
+         <NuSources Include="@(NuSources);$(MSBuildProjectFile);"/>
+      </ItemGroup>
+      <Message Text="NuSources: @(NuSources)"/>
+      <Message Text="NuTargets: @(NuTargets)"/>
+   </Target>
+   <!-- Target: Clean 
+      . removes all .nupkg files from the output path
+   -->
+   <Target Name="Clean" DependsOnTargets="__Prepare;BeforeClean">
+      <ItemGroup>
+         <__CleanFiles Include="$(OutputPath)*.nupkg"/>
+      </ItemGroup>
+      <Delete Files="@(__CleanFiles)"/>
+      <CallTarget Targets="AfterClean"/>
+   </Target>
+   <!-- Target: Build 
+      . creates a .nupkg file for each .nuspec file in the project
+   -->
+   <Target Name="Build"
+           DependsOnTargets="__Prepare;BeforeBuild"
+           Inputs="@(NuSources)"
+           Outputs="@(NuTargets)">
+      <NuPackage NuSpec="@(NuPrepared)"
+                 OutputPath="$(OutputPath)"
+                 ReferenceLibraries="@(__ReferenceLibraries)"/>
+      <Message Text="%(NuPrepared.Filename) -> %(NuPrepared.NuPackagePath)" Importance="high"/>
+      <CallTarget Targets="AfterBuild"/>
+   </Target>
+   <!-- Target: Rebuild 
+      . runs a clean and then a build
+   -->
+   <Target Name="Rebuild" DependsOnTargets="Clean;Build;">
+   </Target>
+   <!-- Dummy targets required for Visual Studio -->
+   <Target Name="GetFrameworkPaths"/>
+   <Target Name="ResolveAssemblyReferences"/>
+   <!-- User Targets -->
+   <Target Name="BeforeClean"/>
+   <Target Name="AfterClean"/>
+   <Target Name="BeforeBuild"/>
+   <Target Name="AfterBuild"/>
+</Project>

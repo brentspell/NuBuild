@@ -9,7 +9,7 @@
       Manufacturer="Brent M. Spell"
       Language="1033">
       <Package 
-         Description="NuGet build framework and project templates" 
+         Description="NuGet package build framework and project templates" 
          Compressed="yes"
          InstallPrivileges="elevated"/>
       <MediaTemplate EmbedCab="yes"/>
@@ -28,10 +28,13 @@
          ConfigurableDirectory="INSTALLFOLDER">
          <ComponentGroupRef Id="Product.Generated"/>
          <Component Id="NuBuild_targets" Guid="*" Directory="NuBuildV1Folder">
-            <File Id="NuBuild_targets" Source="..\MSBuild\NuBuild.targets"/>
+            <File Id="NuBuild_targets" Source="..\MSBuild\Config\NuBuild.targets"/>
          </Component>
          <Component Id="NuBuild_tasks" Guid="*" Directory="NuBuildV1Folder">
-            <File Id="NuBuild_tasks" Source="..\MSBuild\NuBuild.tasks"/>
+            <File Id="NuBuild_tasks" Source="..\MSBuild\Config\NuBuild.tasks"/>
+         </Component>
+         <Component Id="NuBuild_MSBuild_Tasks_dll" Guid="*" Directory="NuBuildV1Folder">
+            <File Id="NuBuild_MSBuild_Tasks_dll" Source="..\Bin\NuBuild.MSBuild.Tasks.dll"/>
          </Component>
          <Component Id="NuBuild_vsix" Guid="*" Directory="NuBuildV1Folder">
             <File Id="NuBuild_vsix" Source="..\Bin\NuBuild.vsix"/>

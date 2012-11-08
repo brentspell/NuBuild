@@ -3,11 +3,10 @@
    <PropertyGroup>
       <ProjectGuid>$guid1$</ProjectGuid>
       <OutputPath>Bin\</OutputPath>
+      <NuBuildVersionSource>library</NuBuildVersionSource>
    </PropertyGroup>
    <PropertyGroup Condition="'$(Configuration)' == 'Debug'"></PropertyGroup>
-   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-      <NuBuildAutoVersion>true</NuBuildAutoVersion>
-   </PropertyGroup>
+   <PropertyGroup Condition="'$(Configuration)' == 'Release'"></PropertyGroup>
    <ItemGroup>
       <Compile Include="$safeprojectname$.nuspec"/>
    </ItemGroup>

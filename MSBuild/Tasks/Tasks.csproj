@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{A0B266F8-F6A5-4A13-9403-F2E07B963F21}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NuBuild.MSBuild</RootNamespace>
+    <AssemblyName>NuBuild.MSBuild.Tasks</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutputPath>..\..\Bin\</OutputPath>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DefineConstants>
+    </DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Build.Framework" />
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
+    <Reference Include="NuGet.Core, Version=1.6.30117.9648, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\..\Version.cs">
+      <Link>Properties\Version.cs</Link>
+    </Compile>
+    <Compile Include="NuPrepare.cs" />
+    <Compile Include="NuPackage.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Debug'">
+    <Delete Files="$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.targets" />
+    <Delete Files="$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.tasks" />
+    <Delete Files="$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.MSBuild.Tasks.dll" />
+    <Exec Command="mklink /h &quot;$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.targets&quot; ..\..\MSBuild\Config\NuBuild.targets" />
+    <Exec Command="mklink /h &quot;$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.tasks&quot; ..\..\MSBuild\Config\NuBuild.tasks" />
+    <Exec Command="mklink /h &quot;$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.MSBuild.Tasks.dll&quot; ..\..\Bin\NuBuild.MSBuild.Tasks.Dll" />
+  </Target>
+</Project>

@@ -1,6 +1,6 @@
 ﻿//===========================================================================
-// MODULE:  AssemblyInfo.cs
-// PURPOSE: assembly configuration properties
+// MODULE:  Version.cs
+// PURPOSE: project version assembly properties
 // 
 // Copyright © 2012
 // Brent M. Spell. All rights reserved.
@@ -19,22 +19,7 @@
 //    Boston, MA 02110-1301 USA
 //===========================================================================
 // System References
-using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 // Project References
-
-[assembly:Guid("1E196872-CD2A-41DC-AFDB-4CF0B34EEB26")]
-[assembly:AssemblyTitle("NuBuild")]
-[assembly:AssemblyDescription("NuGet Package Build Extension Library")]
-[assembly:AssemblyCompany("Brent M. Spell")]
-[assembly:AssemblyProduct("NuBuild")]
-[assembly:AssemblyCopyright("Copyright © 2012 Brent M. Spell. All Rights Reserved.")]
-[assembly:CLSCompliant(false)]
-[assembly:ComVisible(false)]
-#if DEBUG
-[assembly:AssemblyConfiguration("Debug")]
-#else
-[assembly:AssemblyConfiguration("Release")]
-#endif
+[assembly:AssemblyVersion("1.0.1.0")]
+[assembly:AssemblyFileVersion("1.0.1.0")]

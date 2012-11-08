@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{B3AE8184-5376-4F1E-A818-2A66A747FC13}</ProjectGuid>
+    <OutputPath>..\Bin\</OutputPath>
+    <!--BuildNumber>42</BuildNumber--> <!-- TFS build number -->
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <NuBuildVersionSource>auto</NuBuildVersionSource>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Package.nuspec" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\NuBuild\v1\NuBuild.targets" />
+</Project>
