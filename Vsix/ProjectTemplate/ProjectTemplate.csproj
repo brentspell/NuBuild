@@ -39,14 +39,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <ZipProject Include="NuBuild\NuBuild.vstemplate">
+    <ZipProject Include="NuProj\NuProj.vstemplate">
       <SubType>Designer</SubType>
     </ZipProject>
-    <ZipProject Include="NuBuild\NuBuild.nuproj">
+    <ZipProject Include="NuProj\NuProj.nuproj">
       <SubType>Designer</SubType>
     </ZipProject>
-    <ZipProject Include="NuBuild\NuBuild.ico" />
-    <ZipProject Include="NuBuild\NuBuild.nuspec" />
+    <ZipProject Include="NuProj\NuProj.ico" />
+    <ZipProject Include="NuProj\NuProj.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

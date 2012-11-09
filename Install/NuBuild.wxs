@@ -4,12 +4,13 @@
    <?define ProductVersion = "1.0.1"?>
    <Product Id="*"
       UpgradeCode="1948F590-CD4C-4279-9466-5A172FEA8FCE"
-      Name="NuBuild" 
+      Name="NuBuild Project System" 
       Version="$(var.ProductVersion)" 
       Manufacturer="Brent M. Spell"
       Language="1033">
-      <Package 
-         Description="NuGet package build framework and project templates" 
+      <Package
+         Description="A NuGet project system for Visual Studio" 
+         Keywords="nuget nuproj build system visual studio"
          Compressed="yes"
          InstallPrivileges="elevated"/>
       <MediaTemplate EmbedCab="yes"/>
@@ -23,7 +24,7 @@
          </Directory>
       </Directory>
       <Feature Id="All" 
-         Title="NuBuild" 
+         Title="NuBuild Project System" 
          Description="NuGet build framework and project templates"
          ConfigurableDirectory="INSTALLFOLDER">
          <ComponentGroupRef Id="Product.Generated"/>
@@ -36,8 +37,29 @@
          <Component Id="NuBuild_MSBuild_Tasks_dll" Guid="*" Directory="NuBuildV1Folder">
             <File Id="NuBuild_MSBuild_Tasks_dll" Source="..\Bin\NuBuild.MSBuild.Tasks.dll"/>
          </Component>
+         <Component Id="NuBuild_Vsix_Package_dll" Guid="*" Directory="NuBuildV1Folder">
+            <File Id="NuBuild_Vsix_Package_dll" Source="..\Bin\NuBuild.Vsix.Package.dll"/>
+         </Component>
          <Component Id="NuBuild_vsix" Guid="*" Directory="NuBuildV1Folder">
             <File Id="NuBuild_vsix" Source="..\Bin\NuBuild.vsix"/>
+         </Component>
+         <Component Id="NuBuild_Reg_nuproj" Guid="*" Directory="NuBuildV1Folder">
+            <RegistryKey Root="HKCR" Key=".nuproj">
+               <RegistryValue Type="string" Value="NuBuild.NuProj"/>
+            </RegistryKey>
+            <RegistryKey Root="HKCR" Key="NuBuild.NuProj">
+               <RegistryValue Type="string" Value="NuBuild project file"/>
+               <RegistryKey Key="DefaultIcon">
+                  <RegistryValue Type="string" Value="[NuBuildV1Folder]NuBuild.Vsix.Package.dll"/>
+               </RegistryKey>
+               <RegistryKey Key="shell">
+                  <RegistryKey Key="Open">
+                     <RegistryKey Key="Command">
+                        <RegistryValue Type="string" Value='[ProgramFilesFolder]Common Files\Microsoft Shared\MSEnv\VSLauncher.exe "%1"'/>
+                     </RegistryKey>
+                  </RegistryKey>
+               </RegistryKey>
+            </RegistryKey>
          </Component>
       </Feature>
       <MajorUpgrade

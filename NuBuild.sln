@@ -5,7 +5,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{5CB348
 	ProjectSection(SolutionItems) = preProject
 		license.txt = license.txt
 		NuBuild.png = NuBuild.png
-		readme.md = readme.md
+		Version.cs = Version.cs
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Vsix", "Vsix", "{C24B7D6C-4641-4065-8912-2B2DB61D850C}"
@@ -16,11 +16,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectTemplate", "Vsix\Pro
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{676467F8-AD62-4223-B1C4-DBAB19D3131D}"
 	ProjectSection(SolutionItems) = preProject
-		Samples\AutoVersion\AutoVersion.sln = Samples\AutoVersion\AutoVersion.sln
-		Samples\LibraryVersion\LibraryVersion.sln = Samples\LibraryVersion\LibraryVersion.sln
-		Samples\ReferenceVersion\ReferenceVersion.sln = Samples\ReferenceVersion\ReferenceVersion.sln
-		Samples\Simple\Simple.sln = Samples\Simple\Simple.sln
-		Samples\TfsVersion\TfsVersion.sln = Samples\TfsVersion\TfsVersion.sln
+		Samples\Samples.sln = Samples\Samples.sln
 	EndProjectSection
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Install", "Install\Install.wixproj", "{45B0F49D-351E-4C1F-A1C0-4EB943EE53D2}"

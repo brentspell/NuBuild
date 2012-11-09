@@ -26,10 +26,9 @@ using System.Runtime.InteropServices;
 // Project References
 
 [assembly:Guid("1E196872-CD2A-41DC-AFDB-4CF0B34EEB26")]
-[assembly:AssemblyTitle("NuBuild")]
-[assembly:AssemblyDescription("NuGet Package Build Extension Library")]
+[assembly:AssemblyProduct("NuGet Project System")]
+[assembly:AssemblyTitle("NuGet Project System Visual Studio Package")]
 [assembly:AssemblyCompany("Brent M. Spell")]
-[assembly:AssemblyProduct("NuBuild")]
 [assembly:AssemblyCopyright("Copyright © 2012 Brent M. Spell. All Rights Reserved.")]
 [assembly:CLSCompliant(false)]
 [assembly:ComVisible(false)]

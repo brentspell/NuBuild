@@ -3,12 +3,12 @@
    <TemplateData>
       <Name>NuGet Package Specification</Name>
       <Description>NuGet package specification</Description>
-      <Icon>NuBuild.ico</Icon>
+      <Icon>NuSpec.ico</Icon>
       <ProjectType>NuGet</ProjectType>
       <DefaultName>Package.nuspec</DefaultName>
       <ProvideDefaultName>true</ProvideDefaultName>
    </TemplateData>
    <TemplateContent>
-      <ProjectItem ItemType="Compile" ReplaceParameters="true">NuBuild.nuspec</ProjectItem>
+      <ProjectItem ItemType="Compile" ReplaceParameters="true">NuSpec.nuspec</ProjectItem>
    </TemplateContent>
 </VSTemplate>

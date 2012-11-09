@@ -1,6 +1,6 @@
 ![NuBuild](https://raw.github.com/bspell1/NuBuild/master/NuBuild.png) NuBuild
 =========================================================================
-A NuGet package build system and Visual Studio project template
+A NuGet project system for Visual Studio
 
 ###`PM> Install-Package NuBuild`###
 

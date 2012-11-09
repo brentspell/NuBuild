@@ -40,7 +40,6 @@ namespace NuBuild.Vsix
    public sealed class NuBuildNode : ProjectNode
    {
       NuBuildPackage package;
-      static Int32 imageIdx = 0;
 
       /// <summary>
       /// Initializes a new project instance
@@ -52,11 +51,18 @@ namespace NuBuild.Vsix
       {
          base.CanProjectDeleteItems = true;
          this.package = package;
-         imageIdx = this.ImageHandler.ImageList.Images.Count;
+         this.NuProjImageIndex = this.ImageHandler.ImageList.Images.Count;
          this.ImageHandler.ImageList.Images.Add(
             new System.Drawing.Icon(
                Assembly.GetExecutingAssembly()
-                  .GetManifestResourceStream("NuBuild.Vsix.Resources.NuBuild.ico")
+                  .GetManifestResourceStream("NuBuild.Vsix.Resources.NuProj.ico")
+            )
+         );
+         this.NuSpecImageIndex = this.ImageHandler.ImageList.Images.Count;
+         this.ImageHandler.ImageList.Images.Add(
+            new System.Drawing.Icon(
+               Assembly.GetExecutingAssembly()
+                  .GetManifestResourceStream("NuBuild.Vsix.Resources.NuSpec.ico")
             )
          );
       }
@@ -79,7 +85,15 @@ namespace NuBuild.Vsix
       /// </summary>
       public override Int32 ImageIndex
       {
-         get { return imageIdx; }
+         get { return this.NuProjImageIndex; }
+      }
+      public Int32 NuProjImageIndex
+      {
+         get; private set;
+      }
+      public Int32 NuSpecImageIndex
+      {
+         get; private set;
       }
       /// <summary>
       /// Creates the default MSBuild properties for the project
@@ -123,25 +137,30 @@ namespace NuBuild.Vsix
       /// </summary>
       private class NuSpecFileNode : FileNode
       {
+         NuBuildNode project;
+
          /// <summary>
          /// Initializes a new node instance
          /// </summary>
-         /// <param name="root">
+         /// <param name="project">
          /// The current project node
          /// </param>
          /// <param name="element">
          /// The project file element being added
          /// </param>
-         public NuSpecFileNode (ProjectNode root, ProjectElement element)
-            : base(root, element)
+         public NuSpecFileNode (
+            NuBuildNode project, 
+            ProjectElement element)
+            : base(project, element)
          {
+            this.project = project;
          }
          /// <summary>
          /// The image list index for the file tree node
          /// </summary>
          public override Int32 ImageIndex
          {
-            get { return imageIdx; }
+            get { return this.project.NuSpecImageIndex; }
          }
       }
    }

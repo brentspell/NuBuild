@@ -105,21 +105,35 @@ namespace NuBuild.MSBuild
          builder.Version = new NuGet.SemanticVersion(
             specItem.GetMetadata("NuPackageVersion")
          );
-         // add a new file to the "lib" folder for each project DLL
+         // add a new file to the folder for each project
          // referenced by the current project
+         // . DLL references go in the lib package folder
+         // . EXE references go in the tools package folder
+         // . everything else goes in the content package folder
          if (this.ReferenceLibraries != null)
+         {
             foreach (var libItem in this.ReferenceLibraries)
+            {
+               var ext = libItem.GetMetadata("Extension").ToLower();
+               var folder = "content";
+               if (ext == ".dll")
+                  folder = "lib";
+               else if (ext == ".exe")
+                  folder = "tools";
                builder.Files.Add(
                   new NuGet.PhysicalPackageFile()
                   {
                      SourcePath = libItem.GetMetadata("FullPath"),
                      TargetPath = String.Format(
-                        @"lib\{0}{1}",
+                        @"{0}\{1}{2}",
+                        folder,
                         libItem.GetMetadata("Filename"),
                         libItem.GetMetadata("Extension")
                      )
                   }
                );
+            }
+         }
          // write the configured package out to disk
          var pkgPath = specItem.GetMetadata("NuPackagePath");
          using (var pkgFile = 

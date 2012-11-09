@@ -121,6 +121,6 @@
     <value>NuBuild.Vsix.Package</value>
   </data>
   <data name="112" xml:space="preserve">
-    <value>A NuGet package build system and Visual Studio project template</value>
+    <value>A NuGet project system for Visual Studio</value>
   </data>
 </root>

@@ -42,10 +42,10 @@
     <ZipItem Include="NuSpec\NuSpec.vstemplate">
       <SubType>Designer</SubType>
     </ZipItem>
-    <ZipItem Include="NuSpec\NuBuild.nuspec" />
+    <ZipItem Include="NuSpec\NuSpec.nuspec" />
   </ItemGroup>
   <ItemGroup>
-    <ZipItem Include="NuSpec\NuBuild.ico" />
+    <ZipItem Include="NuSpec\NuSpec.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets" />

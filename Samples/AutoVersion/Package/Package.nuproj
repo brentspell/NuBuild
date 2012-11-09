@@ -3,7 +3,8 @@
   <PropertyGroup>
     <ProjectGuid>{B3AE8184-5376-4F1E-A818-2A66A747FC13}</ProjectGuid>
     <OutputPath>..\Bin\</OutputPath>
-    <!--BuildNumber>42</BuildNumber--> <!-- TFS build number -->
+    <!--BuildNumber>42</BuildNumber-->
+    <!-- TFS build number -->
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
   </PropertyGroup>
@@ -14,6 +15,11 @@
     <Compile Include="Package.nuspec" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Library\Library.csproj">
+      <Name>Library</Name>
+      <Project>{159aaaa0-cc13-41b1-9bae-477b649efeef}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\NuBuild\v1\NuBuild.targets" />
 </Project>

@@ -42,10 +42,7 @@
       . removes all .nupkg files from the output path
    -->
    <Target Name="Clean" DependsOnTargets="__Prepare;BeforeClean">
-      <ItemGroup>
-         <__CleanFiles Include="$(OutputPath)*.nupkg"/>
-      </ItemGroup>
-      <Delete Files="@(__CleanFiles)"/>
+      <Delete Files="@(NuTargets)"/>
       <CallTarget Targets="AfterClean"/>
    </Target>
    <!-- Target: Build 
