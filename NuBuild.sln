@@ -97,6 +97,7 @@ Global
 		{A0B266F8-F6A5-4A13-9403-F2E07B963F21}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{A0B266F8-F6A5-4A13-9403-F2E07B963F21}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A0B266F8-F6A5-4A13-9403-F2E07B963F21}.Release|x86.ActiveCfg = Release|Any CPU
+		{A0B266F8-F6A5-4A13-9403-F2E07B963F21}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
