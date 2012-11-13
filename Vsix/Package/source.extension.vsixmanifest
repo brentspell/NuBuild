@@ -9,7 +9,7 @@
       <MoreInfoUrl>http://github.com/bspell1/nubuild</MoreInfoUrl>
       <License>Resources\license.txt</License>
       <Icon>Resources\NuBuild.png</Icon>
-      <InstalledByMsi>false</InstalledByMsi>
+      <InstalledByMsi>true</InstalledByMsi>
       <SupportedProducts>
          <VisualStudio Version="10.0">
             <Edition>Ultimate</Edition>
