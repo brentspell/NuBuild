@@ -16,7 +16,7 @@
     <StartAction>Program</StartAction>
     <StartProgram>$(Registry:HKEY_LOCAL_MACHINE\Software\Microsoft\VisualStudio\10.0@InstallDir)\devenv.exe</StartProgram>
     <StartArguments>/rootsuffix Exp</StartArguments>
-    <OutputPath>..\..\Bin\</OutputPath>
+    <OutputPath>Bin\</OutputPath>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -168,4 +168,7 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets" />
   <Import Project="..\Mpf\ProjectBase.Files" />
+  <Target Name="AfterBuild">
+    <Copy SourceFiles="@(VSIXSourceItem)" DestinationFolder="..\..\Bin\Vsix\%(VSIXSourceItem.VSIXSubPath)" SkipUnchangedFiles="true"/>
+  </Target>
 </Project>

@@ -18,7 +18,16 @@
          <Directory Id="ProgramFilesFolder" Name="ProgFile">
             <Directory Id="MSBuildFolder" Name="MSBuild">
                <Directory Id="INSTALLFOLDER" Name="NuBuild">
-                  <Directory Id="NuBuildV1Folder" Name="v1"/>
+                  <Directory Id="MSBuildNuBuildV1Folder" Name="v1"/>
+               </Directory>
+            </Directory>
+         </Directory>
+         <Directory Id="VSExtNuBuildFolder" Name="NuBuild">
+            <Directory Id="VSExtNuBuildNuBuildFolder" Name="NuBuild">
+               <Directory Id="VSExtNuBuildV1Folder" Name="1.0">
+                  <Directory Id="VSExtNuBuildV1ResourcesFolder" Name="Resources"/>
+                  <Directory Id="VSExtNuBuildV1ProjectTemplatesFolder" Name="ProjectTemplates"/>
+                  <Directory Id="VSExtNuBuildV1ItemTemplatesFolder" Name="ItemTemplates"/>
                </Directory>
             </Directory>
          </Directory>
@@ -28,29 +37,44 @@
          Description="NuGet build framework and project templates"
          ConfigurableDirectory="INSTALLFOLDER">
          <ComponentGroupRef Id="Product.Generated"/>
-         <Component Id="NuBuild_targets" Guid="*" Directory="NuBuildV1Folder">
+         <Component Id="NuBuild_targets" Guid="*" Directory="MSBuildNuBuildV1Folder">
             <File Id="NuBuild_targets" Source="..\MSBuild\Config\NuBuild.targets"/>
          </Component>
-         <Component Id="NuBuild_tasks" Guid="*" Directory="NuBuildV1Folder">
+         <Component Id="NuBuild_tasks" Guid="*" Directory="MSBuildNuBuildV1Folder">
             <File Id="NuBuild_tasks" Source="..\MSBuild\Config\NuBuild.tasks"/>
          </Component>
-         <Component Id="NuBuild_MSBuild_Tasks_dll" Guid="*" Directory="NuBuildV1Folder">
+         <Component Id="NuBuild_MSBuild_Tasks_dll" Guid="*" Directory="MSBuildNuBuildV1Folder">
             <File Id="NuBuild_MSBuild_Tasks_dll" Source="..\Bin\NuBuild.MSBuild.Tasks.dll"/>
          </Component>
-         <Component Id="NuBuild_Vsix_Package_dll" Guid="*" Directory="NuBuildV1Folder">
-            <File Id="NuBuild_Vsix_Package_dll" Source="..\Bin\NuBuild.Vsix.Package.dll"/>
+         <Component Id="NuBuild_Vsix_Package_dll" Guid="{695A5D27-3FB8-4958-A930-D3D308A26945}" Directory="VSExtNuBuildV1Folder">
+            <File Id="NuBuild_Vsix_Package_dll" Source="..\Bin\Vsix\NuBuild.Vsix.Package.dll"/>
          </Component>
-         <Component Id="NuBuild_vsix" Guid="*" Directory="NuBuildV1Folder">
-            <File Id="NuBuild_vsix" Source="..\Bin\NuBuild.vsix"/>
+         <Component Id="NuBuild_Vsix_Package_pkgdef" Guid="{E72F1419-6C09-43D1-B622-E689E2AE696D}" Directory="VSExtNuBuildV1Folder">
+            <File Id="NuBuild_Vsix_Package_pkgdef" Source="..\Bin\Vsix\NuBuild.Vsix.Package.pkgdef"/>
          </Component>
-         <Component Id="NuBuild_Reg_nuproj" Guid="*" Directory="NuBuildV1Folder">
+         <Component Id="Extension_vsixmanifest" Guid="{2A950DC8-91CB-46F0-A022-03FA8C075043}" Directory="VSExtNuBuildV1Folder">
+            <File Id="Extension_vsixmanifest" Source="..\Bin\Vsix\extension.vsixmanifest"/>
+         </Component>
+         <Component Id="license_txt" Guid="{A04B568B-6CC3-4DF6-B5F0-B022C57BB695}" Directory="VSExtNuBuildV1ResourcesFolder">
+            <File Id="license_txt" Source="..\Bin\Vsix\Resources\license.txt"/>
+         </Component>
+         <Component Id="NuBuild_png" Guid="{6A7C3DA1-40D9-4D3C-B278-7DBBBA3618ED}" Directory="VSExtNuBuildV1ResourcesFolder">
+            <File Id="NuBuild_png" Source="..\Bin\Vsix\Resources\nubuild.png"/>
+         </Component>
+         <Component Id="NuProj_zip" Guid="{E780E9E9-4128-4AA3-901D-7224C4AF8261}" Directory="VSExtNuBuildV1ProjectTemplatesFolder">
+            <File Id="NuProj_zip" Source="..\Bin\Vsix\ProjectTemplates\NuProj.zip"/>
+         </Component>
+         <Component Id="NuSpec_zip" Guid="{470120E5-116A-4781-86BB-37023EE0C1E1}" Directory="VSExtNuBuildV1ItemTemplatesFolder">
+            <File Id="NuSpec_zip" Source="..\Bin\Vsix\ItemTemplates\NuSpec.zip"/>
+         </Component>
+         <Component Id="NuBuild_Reg_nuproj" Guid="*" Directory="MSBuildNuBuildV1Folder">
             <RegistryKey Root="HKCR" Key=".nuproj">
                <RegistryValue Type="string" Value="NuBuild.NuProj"/>
             </RegistryKey>
             <RegistryKey Root="HKCR" Key="NuBuild.NuProj">
                <RegistryValue Type="string" Value="NuBuild project file"/>
                <RegistryKey Key="DefaultIcon">
-                  <RegistryValue Type="string" Value="[NuBuildV1Folder]NuBuild.Vsix.Package.dll"/>
+                  <RegistryValue Type="string" Value="[VSExtNuBuildV1Folder]NuBuild.Vsix.Package.dll"/>
                </RegistryKey>
                <RegistryKey Key="shell">
                   <RegistryKey Key="Open">
@@ -77,29 +101,12 @@
             Name="InstallDir" 
             Type="directory" />
       </Property>
-      <CustomAction 
-         Id="SetVsixInstaller" 
-         Return="check" 
-         Execute="immediate" 
-         Property="VsixInstaller" 
-         Value="[VSINSTALLDIR]VsixInstaller.exe" />
       <CustomAction
-         Id="RemoveVsix"
-         Property="VsixInstaller"
-         Execute="deferred"
-         Impersonate="no"
-         ExeCommand=" /u:d4cda160-3cb8-4614-a9ed-f845cb2ddc64 /quiet" 
-         Return="asyncWait"/>
-      <CustomAction 
-         Id="DeployVsix" 
-         Property="VsixInstaller" 
-         Execute="deferred" 
-         Impersonate="no" 
-         ExeCommand=" &quot;[#NuBuild_vsix]&quot; /quiet" />
+         Id="SetNuBuildExtDirectory"
+         Directory="VSExtNuBuildFolder"
+         Value="[VSINSTALLDIR]\Extensions\NuBuild" />
       <InstallExecuteSequence>
-         <Custom Action="SetVsixInstaller" After="ValidateProductID">VsixInstaller=""</Custom>
-         <Custom Action="RemoveVsix" After="MsiPublishAssemblies"/>
-         <Custom Action="DeployVsix" After="RemoveVsix">NOT (REMOVE="ALL")</Custom>
+         <Custom Action="SetNuBuildExtDirectory" After="CostFinalize" />
       </InstallExecuteSequence>
    </Product>
 </Wix>
