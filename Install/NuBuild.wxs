@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- See http://stackoverflow.com/questions/471424/wix-tricks-and-tips -->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-   <?define ProductVersion = "1.0.1"?>
+   <?define ProductVersion = "1.1.0"?>
    <Product Id="*"
       UpgradeCode="1948F590-CD4C-4279-9466-5A172FEA8FCE"
       Name="NuBuild Project System" 
@@ -24,7 +24,7 @@
          </Directory>
          <Directory Id="VSExtNuBuildFolder" Name="NuBuild">
             <Directory Id="VSExtNuBuildNuBuildFolder" Name="NuBuild">
-               <Directory Id="VSExtNuBuildV1Folder" Name="1.0">
+               <Directory Id="VSExtNuBuildV1Folder" Name="1.1">
                   <Directory Id="VSExtNuBuildV1ResourcesFolder" Name="Resources"/>
                   <Directory Id="VSExtNuBuildV1ProjectTemplatesFolder" Name="ProjectTemplates"/>
                   <Directory Id="VSExtNuBuildV1ItemTemplatesFolder" Name="ItemTemplates"/>
@@ -46,8 +46,14 @@
          <Component Id="NuBuild_MSBuild_Tasks_dll" Guid="*" Directory="MSBuildNuBuildV1Folder">
             <File Id="NuBuild_MSBuild_Tasks_dll" Source="..\Bin\NuBuild.MSBuild.Tasks.dll"/>
          </Component>
+         <Component Id="NuBuild_MSBuild_Core_dll" Guid="*" Directory="MSBuildNuBuildV1Folder">
+            <File Id="NuBuild_MSBuild_Core_dll" Source="..\Bin\NuBuild.Core.dll"/>
+         </Component>
          <Component Id="NuBuild_Vsix_Package_dll" Guid="{695A5D27-3FB8-4958-A930-D3D308A26945}" Directory="VSExtNuBuildV1Folder">
             <File Id="NuBuild_Vsix_Package_dll" Source="..\Bin\Vsix\NuBuild.Vsix.Package.dll"/>
+         </Component>
+         <Component Id="NuBuild_Vsix_Core_dll" Guid="{B44C8CDF-269B-42D4-8226-4CFD8C3650C7}" Directory="VSExtNuBuildV1Folder">
+            <File Id="NuBuild_Vsix_Core_dll" Source="..\Bin\NuBuild.Core.dll"/>
          </Component>
          <Component Id="NuBuild_Vsix_Package_pkgdef" Guid="{E72F1419-6C09-43D1-B622-E689E2AE696D}" Directory="VSExtNuBuildV1Folder">
             <File Id="NuBuild_Vsix_Package_pkgdef" Source="..\Bin\Vsix\NuBuild.Vsix.Package.pkgdef"/>

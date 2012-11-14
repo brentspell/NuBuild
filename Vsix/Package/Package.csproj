@@ -20,12 +20,16 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DeployExtension>true</DeployExtension>
+    <DeployVSTemplates>true</DeployVSTemplates>   
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DeployExtension>false</DeployExtension>
+    <DeployVSTemplates>false</DeployVSTemplates>   
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
   </PropertyGroup>
@@ -106,6 +110,7 @@
       <Link>Properties\Version.cs</Link>
     </Compile>
     <Compile Include="NuBuild\NuBuildNode.cs" />
+    <Compile Include="NuBuild\NuBuildPropertyPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NuBuild\NuBuildFactory.cs" />
     <Compile Include="NuBuild\NuBuildPackage.cs" />
@@ -124,6 +129,10 @@
     <None Include="source.extension.vsixmanifest" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Core\Core.csproj">
+      <Project>{DF1AC33F-7D8D-473C-AD88-2CA4EDAD3B70}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ItemTemplate\ItemTemplate.csproj">
       <Project>{6045E4AC-6183-42B4-9880-AD01F46A36ED}</Project>
       <Name>ItemTemplate</Name>
@@ -169,6 +178,6 @@
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets" />
   <Import Project="..\Mpf\ProjectBase.Files" />
   <Target Name="AfterBuild">
-    <Copy SourceFiles="@(VSIXSourceItem)" DestinationFolder="..\..\Bin\Vsix\%(VSIXSourceItem.VSIXSubPath)" SkipUnchangedFiles="true"/>
+    <Copy SourceFiles="@(VSIXSourceItem)" DestinationFolder="..\..\Bin\Vsix\%(VSIXSourceItem.VSIXSubPath)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

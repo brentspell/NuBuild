@@ -1,6 +1,6 @@
 ﻿//===========================================================================
-// MODULE:  Version.cs
-// PURPOSE: project version assembly properties
+// MODULE:  AssemblyInfo.cs
+// PURPOSE: assembly configuration properties
 // 
 // Copyright © 2012
 // Brent M. Spell. All rights reserved.
@@ -19,7 +19,21 @@
 //    Boston, MA 02110-1301 USA
 //===========================================================================
 // System References
+using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 // Project References
-[assembly:AssemblyVersion("1.1.0.0")]
-[assembly:AssemblyFileVersion("1.1.0.0")]
+
+[assembly:Guid("DF1AC33F-7D8D-473C-AD88-2CA4EDAD3B70")]
+[assembly:AssemblyProduct("NuGet Project System")]
+[assembly:AssemblyTitle("NuGet Project System Core Library")]
+[assembly:AssemblyCompany("Brent M. Spell")]
+[assembly:AssemblyCopyright("Copyright © 2012 Brent M. Spell. All Rights Reserved.")]
+[assembly:CLSCompliant(false)]
+[assembly:ComVisible(false)]
+#if DEBUG
+[assembly:AssemblyConfiguration("Debug")]
+#else
+[assembly:AssemblyConfiguration("Release")]
+#endif

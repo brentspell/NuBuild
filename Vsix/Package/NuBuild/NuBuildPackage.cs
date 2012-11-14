@@ -47,8 +47,8 @@ namespace NuBuild.Vsix
       "nuproj",
       "nuproj",
       @".\NullPath",
-      LanguageVsTemplate = "NuGet")
-   ]
+      LanguageVsTemplate = "NuGet")]
+   [ProvideObject(typeof(NuBuildPropertyPage))]
    public sealed class NuBuildPackage : ProjectPackage
    {
       public const String PackageGuidString = "e09dd79a-4488-4ab9-8d3f-a7eee78bf432";

@@ -37,6 +37,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{5D0516
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasks", "MSBuild\Tasks\Tasks.csproj", "{A0B266F8-F6A5-4A13-9403-F2E07B963F21}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{DF1AC33F-7D8D-473C-AD88-2CA4EDAD3B70}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -63,6 +65,10 @@ Global
 		{A0B266F8-F6A5-4A13-9403-F2E07B963F21}.Debug|x86.Build.0 = Debug|x86
 		{A0B266F8-F6A5-4A13-9403-F2E07B963F21}.Release|x86.ActiveCfg = Release|x86
 		{A0B266F8-F6A5-4A13-9403-F2E07B963F21}.Release|x86.Build.0 = Release|x86
+		{DF1AC33F-7D8D-473C-AD88-2CA4EDAD3B70}.Debug|x86.ActiveCfg = Debug|x86
+		{DF1AC33F-7D8D-473C-AD88-2CA4EDAD3B70}.Debug|x86.Build.0 = Debug|x86
+		{DF1AC33F-7D8D-473C-AD88-2CA4EDAD3B70}.Release|x86.ActiveCfg = Release|x86
+		{DF1AC33F-7D8D-473C-AD88-2CA4EDAD3B70}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

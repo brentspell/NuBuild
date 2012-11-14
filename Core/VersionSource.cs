@@ -1,6 +1,6 @@
 ﻿//===========================================================================
-// MODULE:  Version.cs
-// PURPOSE: project version assembly properties
+// MODULE:  VersionSource.cs
+// PURPOSE: NuBuild package version source enumeration
 // 
 // Copyright © 2012
 // Brent M. Spell. All rights reserved.
@@ -19,7 +19,19 @@
 //    Boston, MA 02110-1301 USA
 //===========================================================================
 // System References
-using System.Reflection;
+using System;
+using System.ComponentModel;
 // Project References
-[assembly:AssemblyVersion("1.1.0.0")]
-[assembly:AssemblyFileVersion("1.1.0.0")]
+
+namespace NuBuild
+{
+   /// <summary>
+   /// Package version generation source
+   /// </summary>
+   public enum VersionSource
+   {
+      Manual,     // don't generate package versions
+      Library,    // generate package version from a package DLL
+      Auto        // generate build number from file on disk or $(BuildNumber)
+   }
+}

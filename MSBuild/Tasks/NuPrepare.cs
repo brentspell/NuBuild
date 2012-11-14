@@ -32,16 +32,6 @@ using System.Xml.Linq;
 namespace NuBuild.MSBuild
 {
    /// <summary>
-   /// Package version generation source
-   /// </summary>
-   public enum VersionSource
-   {
-      Manual,     // don't generate package versions
-      Library,    // generate package version from a package DLL
-      Auto        // generate build number from file on disk or $(BuildNumber)
-   }
-
-   /// <summary>
    /// Prepare task
    /// </summary>
    /// <remarks>
@@ -209,10 +199,10 @@ namespace NuBuild.MSBuild
          var specVer = new Version(verElem.Value);
          switch (this.versionSource)
          {
-            case MSBuild.VersionSource.Library:
+            case NuBuild.VersionSource.Library:
                specVer = GetLibraryVersion(specItem, specVer, specDoc);
                break;
-            case MSBuild.VersionSource.Auto:
+            case NuBuild.VersionSource.Auto:
                specVer = GetAutoVersion(specItem, specVer, specDoc);
                break;
          }

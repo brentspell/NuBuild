@@ -1,6 +1,6 @@
 ﻿//===========================================================================
 // MODULE:  NuBuildNode.cs
-// PURPOSE: NuBuild  project node
+// PURPOSE: NuBuild project node
 // 
 // Copyright © 2012
 // Brent M. Spell. All rights reserved.
@@ -130,6 +130,26 @@ namespace NuBuild.Vsix
       public override Boolean IsCodeFile (String fileName)
       {
          return (String.Compare(Path.GetExtension(fileName), ".nuspec", true) == 0);
+      }
+      /// <summary>
+      /// Retrieves the IDs of the project property pages
+      /// </summary>
+      /// <returns>
+      /// Property page GUID list
+      /// </returns>
+      protected override Guid[] GetConfigurationIndependentPropertyPages ()
+      {
+         return new[] { typeof(NuBuildPropertyPage).GUID };
+      }
+      /// <summary>
+      /// Retrieves the IDs of the project property pages
+      /// </summary>
+      /// <returns>
+      /// Property page GUID list
+      /// </returns>
+      protected override Guid[] GetPriorityProjectDesignerPages ()
+      {
+         return new[] { typeof(NuBuildPropertyPage).GUID };
       }
 
       /// <summary>

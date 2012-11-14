@@ -8,11 +8,11 @@
       <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
       <!-- Property: NuBuildVersionSource
          . specifies whether/how the package version string is generated
-         . Manual:   (default) manage in .nuspec file by hand
-         . Library:  retrieve from a library referenced by the package
+         . Manual:   manage in .nuspec file by hand
+         . Library:  (default) retrieve from a library referenced by the package
          . Auto:     generate from a build number file
       -->
-      <NuBuildVersionSource Condition="'$(NuBuildVersionSource)' == ''">Manual</NuBuildVersionSource>
+      <NuBuildVersionSource Condition="'$(NuBuildVersionSource)' == ''">library</NuBuildVersionSource>
    </PropertyGroup>
    <!-- Target: Prepare 
       . initializes the Compile build items, adding custom metadata
