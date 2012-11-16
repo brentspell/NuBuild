@@ -6,8 +6,8 @@
     <RootNamespace>NuBuild</RootNamespace>
     <AssemblyName>NuBuild.Core</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
   </PropertyGroup>
   <PropertyGroup>
     <OutputPath>..\Bin\</OutputPath>
@@ -32,7 +32,7 @@
     <AssemblyOriginatorKeyFile>Resources\Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>..\VS2010\ProjectTemplate\NuProj\NuProj.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\NuProj.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -48,9 +48,7 @@
     <None Include="Resources\Key.snk" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\VS2010\ProjectTemplate\NuProj\NuProj.ico">
-      <Link>Resources\NuProj.ico</Link>
-    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\NuProj.ico"/>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

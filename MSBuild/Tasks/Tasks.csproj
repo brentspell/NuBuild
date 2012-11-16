@@ -3,11 +3,11 @@
   <PropertyGroup>
     <ProjectGuid>{A0B266F8-F6A5-4A13-9403-F2E07B963F21}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuBuild.MSBuild</RootNamespace>
     <AssemblyName>NuBuild.MSBuild.Tasks</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
   </PropertyGroup>
   <PropertyGroup>
     <OutputPath>..\..\Bin\</OutputPath>
