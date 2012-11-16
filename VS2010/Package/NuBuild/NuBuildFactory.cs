@@ -27,7 +27,7 @@ using Microsoft.VisualStudio.Project;
 using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 // Project References
 
-namespace NuBuild.Vsix
+namespace NuBuild.VS
 {
    /// <summary>
    /// Project node factory

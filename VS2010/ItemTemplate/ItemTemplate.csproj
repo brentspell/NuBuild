@@ -5,8 +5,8 @@
     <ProjectGuid>{6045E4AC-6183-42B4-9880-AD01F46A36ED}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NuBuild.Vsix.ItemTemplate</RootNamespace>
-    <AssemblyName>NuBuild.Vsix.ItemTemplate</AssemblyName>
+    <RootNamespace>NuBuild.VS.ItemTemplate</RootNamespace>
+    <AssemblyName>NuBuild.VS.ItemTemplate</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>

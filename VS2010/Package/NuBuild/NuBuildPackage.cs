@@ -27,7 +27,7 @@ using Microsoft.VisualStudio.Project;
 using Microsoft.VisualStudio.Shell;
 // Project References
 
-namespace NuBuild.Vsix
+namespace NuBuild.VS
 {
    /// <summary>
    /// Visual Studio package

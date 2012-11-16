@@ -28,7 +28,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Project;
 // Project References
 
-namespace NuBuild.Vsix
+namespace NuBuild.VS
 {
    /// <summary>
    /// NuGet property page

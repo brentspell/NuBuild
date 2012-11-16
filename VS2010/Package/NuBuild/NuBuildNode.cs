@@ -27,7 +27,7 @@ using System.Reflection;
 using Microsoft.VisualStudio.Project;
 // Project References
 
-namespace NuBuild.Vsix
+namespace NuBuild.VS
 {
    /// <summary>
    /// Project node
@@ -55,14 +55,14 @@ namespace NuBuild.Vsix
          this.ImageHandler.ImageList.Images.Add(
             new System.Drawing.Icon(
                Assembly.GetExecutingAssembly()
-                  .GetManifestResourceStream("NuBuild.Vsix.Resources.NuProj.ico")
+                  .GetManifestResourceStream("NuBuild.VS.Resources.NuProj.ico")
             )
          );
          this.NuSpecImageIndex = this.ImageHandler.ImageList.Images.Count;
          this.ImageHandler.ImageList.Images.Add(
             new System.Drawing.Icon(
                Assembly.GetExecutingAssembly()
-                  .GetManifestResourceStream("NuBuild.Vsix.Resources.NuSpec.ico")
+                  .GetManifestResourceStream("NuBuild.VS.Resources.NuSpec.ico")
             )
          );
       }
