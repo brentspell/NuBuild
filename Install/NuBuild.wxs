@@ -67,6 +67,9 @@
             <Component Id="NuBuild_MSBuild_Core_dll" Guid="*" Directory="MSBuildNuBuildV1Folder">
                <File Id="NuBuild_MSBuild_Core_dll" Source="..\Bin\NuBuild.Core.dll"/>
             </Component>
+            <Component Id="NuBuild_MSBuild_NuGet_Core_dll" Guid="*" Directory="MSBuildNuBuildV1Folder">
+               <File Id="NuBuild_MSBuild_NuGet_Core_dll" Source="..\Bin\NuGet.Core.dll"/>
+            </Component>
          </Feature>
          <!-- VS2010 Extension Files -->
          <Feature Id="VS2010" Level="1">
@@ -175,6 +178,8 @@
       <SetProperty Id="ARPINSTALLLOCATION"
          Value="[INSTALLFOLDER]"
          After="CostFinalize"/>
+      <CustomActionRef Id="VS2010Setup"/>
+      <CustomActionRef Id="VS2012Setup"/>
       <InstallExecuteSequence>
          <Custom Action="SetVS2010ExtDirectory" After="CostFinalize">VS2010INSTALLDIR</Custom>
          <Custom Action="SetVS2012ExtDirectory" After="CostFinalize">VS2012INSTALLDIR</Custom>

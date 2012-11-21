@@ -20,6 +20,10 @@
     <Compile Include="NuBuild.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <WixExtension Include="WixVSExtension">
+      <HintPath>$(WixExtDir)\WixVSExtension.dll</HintPath>
+      <Name>WixVSExtension</Name>
+    </WixExtension>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" />
 </Project>
