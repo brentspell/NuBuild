@@ -26,6 +26,9 @@ NuBuild supports the following options for generating NuGet package version numb
 * **Library:** (default) NuGet will assign the package version from the first library it finds that contains a version resource. The library must either be a project reference or be specified explicitly within the .nuspec &lt;files&gt; section. Use this option if you automatically version the DLLs in your solution.
 * **Auto:** In this mode, the major/minor version numbers are specified manually in the .nuspec file, but NuBuild generates the build number. If the project includes a **$(BuildNumber)** property (as in TFS builds), it will be used as the build number for the package version. Otherwise, NuBuild will create a build.number file and automatically increment it each time the project builds.
 
+##Replacement Tokens##
+NuBuild also supports the NuGet replacement tokens defined at http://docs.nuget.org/docs/reference/nuspec-reference#Replacement_Tokens. If used, the **version** token behaves according to specification regardless of the versioning mode of the project.
+
 ##Samples##
 The project includes samples for all of the valid project configurations.
 
