@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System.Xml.Linq;
@@ -140,26 +141,22 @@ namespace NuBuild.MSBuild
          // issues with multiple .nuspec versions
          var specPath = specItem.GetMetadata("FullPath");
          var specDoc = XDocument.Load(specPath);
-         var idElem = specDoc
-            .Root
-            .Elements()
-            .Single(e => e.Name.LocalName == "metadata")
-            .Elements()
-            .Single(e => e.Name.LocalName == "id");
          var fileElems = specDoc
             .Root
             .Elements()
             .Where(e => e.Name.LocalName == "files")
             .SelectMany(e => e.Elements());
          // construct the path to the NuGet package to build
+         var pkgID = GetPackageID(specDoc);
          var pkgVersion = GetPackageVersion(specItem, specDoc);
          var pkgPath = Path.Combine(
             this.OutputPath,
-            String.Format("{0}.nupkg", idElem.Value)
+            String.Format("{0}.nupkg", pkgID)
          );
          // add custom metadata to the .nuspec build item
          specItem.SetMetadata("NuPackagePath", pkgPath);
-         specItem.SetMetadata("NuPackageVersion", pkgVersion.ToString());
+         if (pkgVersion != null)
+            specItem.SetMetadata("NuPackageVersion", pkgVersion.ToString());
          // add the list of files referenced by the .nuspec file
          // to the dependency list for the build, and add the
          // package file to the target list
@@ -175,6 +172,40 @@ namespace NuBuild.MSBuild
             )
          );
          this.targetList.Add(new TaskItem(pkgPath));
+      }
+      /// <summary>
+      /// Retrieves the package's ID
+      /// </summary>
+      /// <param name="specDoc">
+      /// The nuspec document
+      /// </param>
+      /// <returns>
+      /// The package ID, after replacements have been applied
+      /// </returns>
+      String GetPackageID (XDocument specDoc)
+      {
+         var id = specDoc
+            .Root
+            .Elements()
+            .Single(e => e.Name.LocalName == "metadata")
+            .Elements()
+            .Single(e => e.Name.LocalName == "id")
+            .Value;
+         if (id == "$id$")
+         {
+            foreach (var libItem in this.ReferenceLibraries)
+            {
+               var asm = (Assembly)null;
+               try
+               {
+                  asm = Assembly.Load(File.ReadAllBytes(libItem.GetMetadata("FullPath")));
+               }
+               catch { }
+               if (asm != null)
+                  id = asm.GetName().Name;
+            }
+         }
+         return id;
       }
       /// <summary>
       /// Constructs a nuget package version for the current project
@@ -196,18 +227,22 @@ namespace NuBuild.MSBuild
             .Single(e => e.Name.LocalName == "metadata")
             .Elements()
             .Single(e => e.Name.LocalName == "version");
-         var specVer = new Version(verElem.Value);
-         switch (this.versionSource)
+         if (verElem.Value != "$version$")
          {
-            case NuBuild.VersionSource.Library:
-               specVer = GetLibraryVersion(specItem, specVer, specDoc);
-               break;
-            case NuBuild.VersionSource.Auto:
-               specVer = GetAutoVersion(specItem, specVer, specDoc);
-               break;
+            var specVer = new Version(verElem.Value);
+            switch (this.versionSource)
+            {
+               case NuBuild.VersionSource.Library:
+                  specVer = GetLibraryVersion(specItem, specVer, specDoc);
+                  break;
+               case NuBuild.VersionSource.Auto:
+                  specVer = GetAutoVersion(specItem, specVer, specDoc);
+                  break;
+            }
+            // nuget does not support build revision numbers
+            return new Version(specVer.Major, specVer.Minor, specVer.Build);
          }
-         // nuget does not support build revision numbers
-         return new Version(specVer.Major, specVer.Minor, specVer.Build);
+         return null;
       }
       /// <summary>
       /// Constructs a nuget package version from a library referenced

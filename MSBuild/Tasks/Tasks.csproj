@@ -54,10 +54,14 @@
   <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Debug'">
     <Delete Files="$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.targets" />
     <Delete Files="$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.tasks" />
+    <Delete Files="$(MSBuildExtensionsPath)\NuBuild\v1\NuGet.Core.dll" />
+    <Delete Files="$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.Core.dll" />
     <Delete Files="$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.MSBuild.Tasks.dll" />
     <MakeDir Directories="$(MSBuildExtensionsPath)\NuBuild\v1" />
     <Exec Command="mklink /h &quot;$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.targets&quot; ..\..\MSBuild\Config\NuBuild.targets" />
     <Exec Command="mklink /h &quot;$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.tasks&quot; ..\..\MSBuild\Config\NuBuild.tasks" />
-    <Exec Command="mklink /h &quot;$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.MSBuild.Tasks.dll&quot; ..\..\Bin\NuBuild.MSBuild.Tasks.Dll" />
+    <Exec Command="mklink /h &quot;$(MSBuildExtensionsPath)\NuBuild\v1\NuGet.Core.dll&quot; ..\..\Bin\NuGet.Core.dll" />
+    <Exec Command="mklink /h &quot;$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.Core.dll&quot; ..\..\Bin\NuBuild.Core.dll" />
+    <Exec Command="mklink /h &quot;$(MSBuildExtensionsPath)\NuBuild\v1\NuBuild.MSBuild.Tasks.dll&quot; ..\..\Bin\NuBuild.MSBuild.Tasks.dll" />
   </Target>
 </Project>

@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 // Project References
@@ -36,7 +37,7 @@ namespace NuBuild.MSBuild
    /// This task compiles a set of .nuspec items into a corresponding set
    /// of NuGet packages (.nupkg) files.
    /// </remarks>
-   public sealed class NuPackage : Task
+   public sealed class NuPackage : Task, NuGet.IPropertyProvider
    {
       #region Task Parameters
       /// <summary>
@@ -90,60 +91,103 @@ namespace NuBuild.MSBuild
          // using the nuget package builder
          var specPath = specItem.GetMetadata("FullPath");
          var builder = (NuGet.PackageBuilder)null;
-         using (var specFile = 
-            new FileStream(
-               specPath, 
-               FileMode.Open, 
-               FileAccess.Read
-            )
-         )
+         using (var specFile = File.OpenRead(specPath))
             builder = new NuGet.PackageBuilder(
                specFile,
-               Path.GetDirectoryName(specPath)
+               Path.GetDirectoryName(specPath),
+               this as NuGet.IPropertyProvider
             );
          // initialize dynamic manifest properties
-         builder.Version = new NuGet.SemanticVersion(
-            specItem.GetMetadata("NuPackageVersion")
-         );
+         var version = specItem.GetMetadata("NuPackageVersion");
+         if (!String.IsNullOrEmpty(version))
+            builder.Version = new NuGet.SemanticVersion(version);
          // add a new file to the folder for each project
          // referenced by the current project
+         if (this.ReferenceLibraries != null)
+            AddLibraries(builder);
+         // write the configured package out to disk
+         var pkgPath = specItem.GetMetadata("NuPackagePath");
+         using (var pkgFile = File.Create(pkgPath))
+            builder.Save(pkgFile);
+      }
+      private void AddLibraries (NuGet.PackageBuilder builder)
+      {
+         // add package files from project references
          // . DLL references go in the lib package folder
          // . EXE references go in the tools package folder
          // . everything else goes in the content package folder
-         if (this.ReferenceLibraries != null)
+         foreach (var libItem in this.ReferenceLibraries)
          {
-            foreach (var libItem in this.ReferenceLibraries)
+            var ext = libItem.GetMetadata("Extension").ToLower();
+            var folder = "content";
+            if (ext == ".dll")
+               folder = "lib";
+            else if (ext == ".exe")
+               folder = "tools";
+            builder.Files.Add(
+               new NuGet.PhysicalPackageFile()
+               {
+                  SourcePath = libItem.GetMetadata("FullPath"),
+                  TargetPath = String.Format(
+                     @"{0}\{1}{2}",
+                     folder,
+                     libItem.GetMetadata("Filename"),
+                     libItem.GetMetadata("Extension")
+                  )
+               }
+            );
+         }
+      }
+
+      #region IPropertyProvider Implementation
+      /// <summary>
+      /// Retrieves nuget replacement values from a referenced
+      /// assembly library, as specified here:
+      /// http://docs.nuget.org/docs/reference/nuspec-reference#Replacement_Tokens
+      /// </summary>
+      /// <param name="property">
+      /// The replacement property to retrieve
+      /// </param>
+      /// <returns>
+      /// The replacement property value
+      /// </returns>
+      public dynamic GetPropertyValue (String property)
+      {
+         foreach (var libItem in this.ReferenceLibraries)
+         {
+            var asm = (Assembly)null;
+            try
             {
-               var ext = libItem.GetMetadata("Extension").ToLower();
-               var folder = "content";
-               if (ext == ".dll")
-                  folder = "lib";
-               else if (ext == ".exe")
-                  folder = "tools";
-               builder.Files.Add(
-                  new NuGet.PhysicalPackageFile()
-                  {
-                     SourcePath = libItem.GetMetadata("FullPath"),
-                     TargetPath = String.Format(
-                        @"{0}\{1}{2}",
-                        folder,
-                        libItem.GetMetadata("Filename"),
-                        libItem.GetMetadata("Extension")
-                     )
-                  }
-               );
+               asm = Assembly.Load(File.ReadAllBytes(libItem.GetMetadata("FullPath")));
+            }
+            catch { }
+            if (asm != null)
+            {
+               if (property == "id")
+                  return asm.GetName().Name;
+               if (property == "version")
+                  if (asm.GetName().Version != new Version(0, 0, 0, 0))
+                     return asm.GetName().Version.ToString();
+               if (property == "author")
+               {
+                  var attr = (AssemblyCompanyAttribute)asm
+                     .GetCustomAttributes(typeof(AssemblyCompanyAttribute), false)
+                     .FirstOrDefault();
+                  if (attr != null)
+                     return attr.Company;
+               }
+               if (property == "description")
+               {
+                  var attr = (AssemblyDescriptionAttribute)asm
+                     .GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false)
+                     .FirstOrDefault();
+                  if (attr != null)
+                     return attr.Description;
+               }
             }
          }
-         // write the configured package out to disk
-         var pkgPath = specItem.GetMetadata("NuPackagePath");
-         using (var pkgFile = 
-            new FileStream(
-               pkgPath, 
-               FileMode.Create, 
-               FileAccess.Read | FileAccess.Write
-            )
-         )
-            builder.Save(pkgFile);
+         return null;
       }
+      #endregion
    }
 }

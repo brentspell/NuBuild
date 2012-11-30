@@ -24,6 +24,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{5D0516
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Package", "VS\Package\Package.csproj", "{1E196872-CD2A-41DC-AFDB-4CF0B34EEB26}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A0B266F8-F6A5-4A13-9403-F2E07B963F21} = {A0B266F8-F6A5-4A13-9403-F2E07B963F21}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectTemplate", "VS\ProjectTemplate\ProjectTemplate.csproj", "{8E6F74CF-7D2C-4BDC-979B-23654E2B9587}"
 EndProject
