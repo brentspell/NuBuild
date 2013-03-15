@@ -2,7 +2,7 @@
 =========================================================================
 A NuGet project system for Visual Studio
 
-Download the latest [version](http://github.com/downloads/bspell1/NuBuild/NuBuild.msi) and check it out on the [gallery](http://visualstudiogallery.msdn.microsoft.com/3efbfdea-7d51-4d45-a954-74a2df51c5d0).
+Download the latest [version](http://brentspell.com/download/NuBuild.msi) and check it out on the [gallery](http://visualstudiogallery.msdn.microsoft.com/3efbfdea-7d51-4d45-a954-74a2df51c5d0).
 
 ##Features##
 * Creates a new project type (.nuproj) in Visual Studio, so you can manage your NuGet packages right along with your other projects
