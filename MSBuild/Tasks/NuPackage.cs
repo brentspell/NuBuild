@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 // Project References
@@ -39,6 +40,8 @@ namespace NuBuild.MSBuild
    /// </remarks>
    public sealed class NuPackage : Task, NuGet.IPropertyProvider
    {
+      private Project propertyProject = null;
+
       #region Task Parameters
       /// <summary>
       /// The source .nuspec file items
@@ -142,7 +145,7 @@ namespace NuBuild.MSBuild
       #region IPropertyProvider Implementation
       /// <summary>
       /// Retrieves nuget replacement values from a referenced
-      /// assembly library, as specified here:
+      /// assembly library or MSBuild property, as specified here:
       /// http://docs.nuget.org/docs/reference/nuspec-reference#Replacement_Tokens
       /// </summary>
       /// <param name="property">
@@ -153,6 +156,7 @@ namespace NuBuild.MSBuild
       /// </returns>
       public dynamic GetPropertyValue (String property)
       {
+         // attempt to resolve the property from the referenced libraries
          foreach (var libItem in this.ReferenceLibraries)
          {
             var asm = (Assembly)null;
@@ -186,7 +190,10 @@ namespace NuBuild.MSBuild
                }
             }
          }
-         return null;
+         // attempt to resolve the property from MSBuild
+         if (this.propertyProject == null)
+            this.propertyProject = new Project(System.Xml.XmlReader.Create(this.BuildEngine.ProjectFileOfTaskNode));
+         return this.propertyProject.GetPropertyValue(property);
       }
       #endregion
    }
