@@ -52,7 +52,8 @@
            DependsOnTargets="__Prepare;BeforeBuild"
            Inputs="@(NuSources)"
            Outputs="@(NuTargets)">
-      <NuPackage NuSpec="@(NuPrepared)"
+      <NuPackage ProjectPath="$(MSBuildProjectFullPath)"
+                 NuSpec="@(NuPrepared)"
                  OutputPath="$(OutputPath)"
                  ReferenceLibraries="@(__ReferenceLibraries)"/>
       <Message Text="%(NuPrepared.Filename) -> %(NuPrepared.NuPackagePath)" Importance="high"/>

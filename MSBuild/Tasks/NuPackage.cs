@@ -44,6 +44,11 @@ namespace NuBuild.MSBuild
 
       #region Task Parameters
       /// <summary>
+      /// The full project path
+      /// </summary>
+      [Required]
+      public String ProjectPath { get; set; }
+      /// <summary>
       /// The source .nuspec file items
       /// </summary>
       [Required]
@@ -192,8 +197,17 @@ namespace NuBuild.MSBuild
          }
          // attempt to resolve the property from MSBuild
          if (this.propertyProject == null)
-            this.propertyProject = new Project(System.Xml.XmlReader.Create(this.BuildEngine.ProjectFileOfTaskNode));
-         return this.propertyProject.GetPropertyValue(property);
+            this.propertyProject = ProjectCollection
+               .GlobalProjectCollection
+               .LoadedProjects
+               .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.FullPath, this.ProjectPath) == 0)
+               .FirstOrDefault();
+         if (this.propertyProject != null)
+            return this.propertyProject.AllEvaluatedProperties
+               .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.Name, property) == 0)
+               .Select(p => p.EvaluatedValue)
+               .FirstOrDefault();
+         return null;
       }
       #endregion
    }
