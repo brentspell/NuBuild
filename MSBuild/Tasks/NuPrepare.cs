@@ -231,7 +231,7 @@ namespace NuBuild.MSBuild
             .Single(e => e.Name.LocalName == "version");
          if (verElem.Value != "$version$")
          {
-            Version specVer = new SemanticVersion(verElem.Value).Version;
+           Version specVer = new SemanticVersion(verElem.Value).Version;
             switch (this.versionSource)
             {
                case NuBuild.VersionSource.Library:
