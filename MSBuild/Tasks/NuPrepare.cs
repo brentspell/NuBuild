@@ -28,6 +28,8 @@ using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System.Xml.Linq;
+using NuGet;
+
 // Project References
 
 namespace NuBuild.MSBuild
@@ -219,7 +221,7 @@ namespace NuBuild.MSBuild
       /// <returns>
       /// The current package version
       /// </returns>
-      private Version GetPackageVersion (ITaskItem specItem, XDocument specDoc)
+      private SemanticVersion GetPackageVersion (ITaskItem specItem, XDocument specDoc)
       {
          var verElem = specDoc
             .Root
@@ -229,7 +231,7 @@ namespace NuBuild.MSBuild
             .Single(e => e.Name.LocalName == "version");
          if (verElem.Value != "$version$")
          {
-            var specVer = new Version(verElem.Value);
+            Version specVer = new SemanticVersion(verElem.Value).Version;
             switch (this.versionSource)
             {
                case NuBuild.VersionSource.Library:
@@ -238,9 +240,11 @@ namespace NuBuild.MSBuild
                case NuBuild.VersionSource.Auto:
                   specVer = GetAutoVersion(specItem, specVer, specDoc);
                   break;
+               case NuBuild.VersionSource.Manual:
+                  return new SemanticVersion(verElem.Value);
             }
             // nuget does not support build revision numbers
-            return new Version(specVer.Major, specVer.Minor, specVer.Build);
+            return new SemanticVersion(specVer);
          }
          return null;
       }
@@ -326,7 +330,6 @@ namespace NuBuild.MSBuild
          if (this.BuildNumber == 0)
          {
             // retrieve the current build number
-            var projectFile = this.HostObject;
             var buildFile = Path.Combine(
                this.OutputPath,
                String.Format("{0}.build.number", this.ProjectName)
