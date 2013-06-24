@@ -13,6 +13,11 @@
          . Auto:     generate from a build number file
       -->
       <NuBuildVersionSource Condition="'$(NuBuildVersionSource)' == ''">library</NuBuildVersionSource>
+      <!-- Property: NuBuildVersionFileName
+         . specifies whether to include the version number in the compiled 
+           package file name
+      -->
+      <NuBuildVersionFileName Condition="'$(NuBuildVersionFileName)' == ''">false</NuBuildVersionFileName>
    </PropertyGroup>
    <!-- Target: Prepare 
       . initializes the Compile build items, adding custom metadata
@@ -25,6 +30,7 @@
       <NuPrepare NuSpec="@(Compile)"
                  ProjectName="$(MSBuildProjectName)"
                  VersionSource="$(NuBuildVersionSource)"
+                 VersionFileName="$(NuBuildVersionFileName)"
                  OutputPath="$(OutputPath)"
                  BuildNumber="$(BuildNumber)"
                  ReferenceLibraries="@(__ReferenceLibraries)">

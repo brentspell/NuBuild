@@ -76,6 +76,11 @@ namespace NuBuild.MSBuild
       /// </summary>
       public Int32 BuildNumber { get; set; }
       /// <summary>
+      /// Specifies whether to include the version number in the package 
+      /// file name
+      /// </summary>
+      public Boolean VersionFileName { get; set; }
+      /// <summary>
       /// The list of DLLs referenced by the current
       /// NuGet project
       /// </summary>
@@ -102,14 +107,17 @@ namespace NuBuild.MSBuild
       /// </returns>
       public override Boolean Execute ()
       {
-         this.OutputPath = Path.GetFullPath(this.OutputPath);
          try
          {
+            // parepare the task for execution
+            if (this.ReferenceLibraries == null)
+               this.ReferenceLibraries = new ITaskItem[0];
+            this.OutputPath = Path.GetFullPath(this.OutputPath);
+            Directory.CreateDirectory(this.OutputPath);
             // add build dependencies from the nuspec file(s)
             // and the list of project references
             this.sourceList.AddRange(this.NuSpec);
-            if (this.ReferenceLibraries != null)
-               this.sourceList.AddRange(this.ReferenceLibraries);
+            this.sourceList.AddRange(this.ReferenceLibraries);
             // parse the version source name
             this.versionSource = (VersionSource)Enum.Parse(
                typeof(VersionSource), 
@@ -147,14 +155,15 @@ namespace NuBuild.MSBuild
             .Root
             .Elements()
             .Where(e => e.Name.LocalName == "files")
-            .SelectMany(e => e.Elements());
+            .SelectMany(e => e.Elements())
+            .Where(e => e.Attribute("src") != null);
          // construct the path to the NuGet package to build
          var pkgID = GetPackageID(specDoc);
          var pkgVersion = GetPackageVersion(specItem, specDoc);
-         var pkgPath = Path.Combine(
-            this.OutputPath,
-            String.Format("{0}.nupkg", pkgID)
-         );
+         var pkgFile = this.VersionFileName ?
+            String.Format("{0}.{1}.nupkg", pkgID, pkgVersion) :
+            String.Format("{0}.nupkg", pkgID);
+         var pkgPath = Path.Combine(this.OutputPath, pkgFile);
          // add custom metadata to the .nuspec build item
          specItem.SetMetadata("NuPackagePath", pkgPath);
          if (pkgVersion != null)
@@ -229,24 +238,20 @@ namespace NuBuild.MSBuild
             .Single(e => e.Name.LocalName == "metadata")
             .Elements()
             .Single(e => e.Name.LocalName == "version");
-         if (verElem.Value != "$version$")
+         var specVer = new SemanticVersion(
+            verElem.Value != "$version$" ? verElem.Value : "0.0.0.0"
+         );
+         switch (this.versionSource)
          {
-            Version specVer = new SemanticVersion(verElem.Value).Version;
-            switch (this.versionSource)
-            {
-               case NuBuild.VersionSource.Library:
-                  specVer = GetLibraryVersion(specItem, specVer, specDoc);
-                  break;
-               case NuBuild.VersionSource.Auto:
-                  specVer = GetAutoVersion(specItem, specVer, specDoc);
-                  break;
-               case NuBuild.VersionSource.Manual:
-                  return new SemanticVersion(verElem.Value);
-            }
-            // nuget does not support build revision numbers
-            return new SemanticVersion(specVer);
+            case NuBuild.VersionSource.Library:
+               return GetLibraryVersion(specItem, specVer, specDoc);
+            case NuBuild.VersionSource.Auto:
+               return GetAutoVersion(specItem, specVer, specDoc);
+            case NuBuild.VersionSource.Manual:
+               return specVer;
+            default:
+               return null;
          }
-         return null;
       }
       /// <summary>
       /// Constructs a nuget package version from a library referenced
@@ -266,16 +271,17 @@ namespace NuBuild.MSBuild
       /// that includes a version number if found
       /// The version in the .nuspec file otherwise
       /// </returns>
-      private Version GetLibraryVersion (
+      private SemanticVersion GetLibraryVersion (
          ITaskItem specItem, 
-         Version specVer,
+         SemanticVersion specVer,
          XDocument specDoc)
       {
          var fileElems = specDoc
             .Root
             .Elements()
             .Where(e => e.Name.LocalName == "files")
-            .SelectMany(e => e.Elements());
+            .SelectMany(e => e.Elements())
+            .Where(e => e.Attribute("src") != null);
          // retrieve the library version
          // . iterate through the libraries specified either
          //   through project references or explicitly in the
@@ -283,7 +289,7 @@ namespace NuBuild.MSBuild
          // . attempt to retrieve the product version for each
          //   file
          // . return the version of the first file with a version
-         return (this.ReferenceLibraries ?? new ITaskItem[0])
+         return this.ReferenceLibraries
             .Select(i => i.GetMetadata("FullPath"))
             .Concat(
                fileElems.Select(
@@ -293,10 +299,11 @@ namespace NuBuild.MSBuild
                      e.Attribute("src").Value
                   )
                )
-            ).Select(p => FileVersionInfo.GetVersionInfo(p).ProductVersion)
+            ).Where(p => File.Exists(p))
+            .Select(p => FileVersionInfo.GetVersionInfo(p).ProductVersion)
             .Where(v => v != null)
-            .Select(v => new Version(v))
-            .Where(v => v != new Version(0, 0, 0, 0))
+            .Select(v => new SemanticVersion(v))
+            .Where(v => v != new SemanticVersion(0, 0, 0, 0))
             .DefaultIfEmpty(specVer)
             .First();
       }
@@ -319,9 +326,9 @@ namespace NuBuild.MSBuild
       /// are taken from the .nuspec file; the build number is determined
       /// automatically
       /// </returns>
-      private Version GetAutoVersion (
+      private SemanticVersion GetAutoVersion (
          ITaskItem specItem,
-         Version specVer,
+         SemanticVersion specVer,
          XDocument specDoc)
       {
          // if the build number was not specified in the project 
@@ -342,7 +349,12 @@ namespace NuBuild.MSBuild
             this.BuildNumber = buildNum + 1;
             File.WriteAllText(buildFile, this.BuildNumber.ToString());
          }
-         return new Version(specVer.Major, specVer.Minor, this.BuildNumber);
+         return new SemanticVersion(
+            specVer.Version.Major, 
+            specVer.Version.Minor, 
+            this.BuildNumber,
+            specVer.Version.Revision
+         );
       }
    }
 }

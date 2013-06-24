@@ -4,6 +4,7 @@
       <ProjectGuid>$guid1$</ProjectGuid>
       <OutputPath>Bin\</OutputPath>
       <NuBuildVersionSource>library</NuBuildVersionSource>
+      <NuBuildVersionFileName>true</NuBuildVersionFileName>
    </PropertyGroup>
    <PropertyGroup Condition="'$(Configuration)' == 'Debug'"></PropertyGroup>
    <PropertyGroup Condition="'$(Configuration)' == 'Release'"></PropertyGroup>
