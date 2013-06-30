@@ -43,6 +43,7 @@ namespace NuBuild.VS
    {
       private String outputPath;
       private VersionSource versionSource;
+      private Boolean versionFileName;
 
       /// <summary>
       /// Initializes a new property page instance
@@ -77,6 +78,18 @@ namespace NuBuild.VS
       }
 
       /// <summary>
+      /// Specifies whether to include the version number in the output file name
+      /// </summary>
+      [Category("Package Generation")]
+      [DisplayName("Version File Name")]
+      [Description("Specifies whether to include the version number in the output file name.")]
+      public Boolean VersionFileName
+      {
+         get { return this.versionFileName; }
+         set { this.versionFileName = value; this.IsDirty = true; }
+      }
+
+      /// <summary>
       /// Retrieves property values from the project file
       /// </summary>
       protected override void BindProperties ()
@@ -89,6 +102,9 @@ namespace NuBuild.VS
             typeof(VersionSource),
             this.ProjectMgr.GetProjectProperty("NuBuildVersionSource", true),
             true
+         );
+         this.versionFileName = Boolean.Parse(
+            this.ProjectMgr.GetProjectProperty("NuBuildVersionFileName")
          );
       }
       /// <summary>
@@ -107,6 +123,10 @@ namespace NuBuild.VS
          this.ProjectMgr.SetProjectProperty(
             "NuBuildVersionSource", 
             this.versionSource.ToString()
+         );
+         this.ProjectMgr.SetProjectProperty(
+            "NuBuildVersionFileName",
+            this.versionFileName.ToString()
          );
          this.IsDirty = false;
          return VSConstants.S_OK;

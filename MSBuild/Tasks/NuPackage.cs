@@ -25,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 // Project References
@@ -74,9 +75,13 @@ namespace NuBuild.MSBuild
       /// </returns>
       public override Boolean Execute ()
       {
-         this.OutputPath = Path.GetFullPath(this.OutputPath);
          try
          {
+            // parepare the task for execution
+            if (this.ReferenceLibraries == null)
+               this.ReferenceLibraries = new ITaskItem[0];
+            this.OutputPath = Path.GetFullPath(this.OutputPath);
+            // compile the nuget package
             foreach (var specItem in this.NuSpec)
                BuildPackage(specItem);
          }
@@ -111,13 +116,18 @@ namespace NuBuild.MSBuild
             builder.Version = new NuGet.SemanticVersion(version);
          // add a new file to the folder for each project
          // referenced by the current project
-         if (this.ReferenceLibraries != null)
-            AddLibraries(builder);
+         AddLibraries(builder);
          // write the configured package out to disk
          var pkgPath = specItem.GetMetadata("NuPackagePath");
          using (var pkgFile = File.Create(pkgPath))
             builder.Save(pkgFile);
       }
+      /// <summary>
+      /// Adds project references to the package lib section
+      /// </summary>
+      /// <param name="builder">
+      /// The current package builder
+      /// </param>
       private void AddLibraries (NuGet.PackageBuilder builder)
       {
          // add package files from project references
@@ -195,13 +205,50 @@ namespace NuBuild.MSBuild
                }
             }
          }
-         // attempt to resolve the property from MSBuild
+         // attempt to resolve the requested property
+         // from the project properties
          if (this.propertyProject == null)
+         {
+            // attempt to retrieve the project from the global collection
+            // this should always work in Visual Studio
             this.propertyProject = ProjectCollection
                .GlobalProjectCollection
                .LoadedProjects
                .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.FullPath, this.ProjectPath) == 0)
                .FirstOrDefault();
+            //---------------------------------------------------------------
+            // HACK: bspell - 6/25/2013
+            // . unfortunately, MSBuild does not maintain the current project
+            //   in the global project collection, nor does it expose the
+            //   global properties collection for generic property retrieval
+            // . retrieve the build parameters here using reflection to
+            //   get the global MSBuild properties collection and load the
+            //   project manually
+            // . accessing private members using reflection is awful, but the
+            //   alternative would be to pass in all possible MSBuild 
+            //   properties to the custom task, which wouldn't even work for
+            //   application-specific properties
+            // . this method may be incompatible with future versions of 
+            //   MSBuild
+            //---------------------------------------------------------------
+            if (this.propertyProject == null)
+            {
+               var prop = BuildManager.DefaultBuildManager.GetType().GetProperty(
+                  "Microsoft.Build.BackEnd.IBuildComponentHost.BuildParameters", 
+                  BindingFlags.Instance | BindingFlags.NonPublic
+               );
+               if (prop == null)
+                  throw new NotSupportedException("Unable to retrieve MSBuild parameters using reflection");
+               var param = (BuildParameters)prop
+                  .GetValue(BuildManager.DefaultBuildManager, null);
+               this.propertyProject = ProjectCollection.GlobalProjectCollection
+                  .LoadProject(
+                     this.ProjectPath, 
+                     param.GlobalProperties, 
+                     ProjectCollection.GlobalProjectCollection.DefaultToolsVersion
+                  );
+            }
+         }
          if (this.propertyProject != null)
             return this.propertyProject.AllEvaluatedProperties
                .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.Name, property) == 0)

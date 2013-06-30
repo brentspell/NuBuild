@@ -5,6 +5,9 @@ obj
 # mstest test results
 TestResults
 
+# Downloaded nuget packages.
+/Packages/
+
 # user files
 *.user
 *.suo
