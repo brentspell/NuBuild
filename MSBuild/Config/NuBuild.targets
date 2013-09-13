@@ -2,6 +2,11 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
    <!-- NuBuild Tasks -->
    <Import Project="$(MSBuildExtensionsPath32)\NuBuild\v1\NuBuild.tasks" />
+   <!-- MSBuild 4.5 Properties -->
+   <PropertyGroup>
+      <OutputPath Condition="'$(OutDir)' != '' AND '$(GenerateProjectSpecificOutputFolder)' == 'true'">$(OutDir)\$(MSBuildProjectName)</OutputPath>
+      <OutputPath Condition="'$(OutDir)' != '' AND '$(GenerateProjectSpecificOutputFolder)' != 'true'">$(OutDir)</OutputPath>
+   </PropertyGroup>
    <!-- NuBuild Properties -->
    <PropertyGroup>
       <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
