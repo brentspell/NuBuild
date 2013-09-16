@@ -103,13 +103,7 @@ namespace NuBuild.MSBuild
          // load the package manifest (nuspec) from the task item
          // using the nuget package builder
          var specPath = specItem.GetMetadata("FullPath");
-         var builder = (NuGet.PackageBuilder)null;
-         using (var specFile = File.OpenRead(specPath))
-            builder = new NuGet.PackageBuilder(
-               specFile,
-               Path.GetDirectoryName(specPath),
-               this as NuGet.IPropertyProvider
-            );
+         var builder = new NuGet.PackageBuilder(specPath, this as NuGet.IPropertyProvider, false);
          // initialize dynamic manifest properties
          var version = specItem.GetMetadata("NuPackageVersion");
          if (!String.IsNullOrEmpty(version))
