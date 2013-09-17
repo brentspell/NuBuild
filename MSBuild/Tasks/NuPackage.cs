@@ -174,27 +174,16 @@ namespace NuBuild.MSBuild
       /// </param>
       private String GetShortTargetFrameworkName(String assemblyFile)
       {
-         var appDomain = (AppDomain)null;
-         try
-         {
-            appDomain = RemoteAssemblyProxy.CreateDomain("TempPackageDomain");
-            var assembly = new RemoteAssemblyProxy(appDomain);
-            assembly.ReflectionOnlyLoadFrom(assemblyFile);
-            var targetFrameworkName = assembly.GetCustomAttribute<String>(
-                  ad => ad.Constructor.DeclaringType == typeof(TargetFrameworkAttribute),
-                  ad => (String)(ad.ConstructorArguments[0].Value));
-            // TODO
-            // before .Net40, TargetFrameworkAttribute is not stored in the assembly, we should parse the .csproj file
-            // from libItem.GetMetadata("MSBuildSourceProjectFile")
-            //if (targetFrameworkName == null)
-            //{ }
-            return targetFrameworkName == null ? null : VersionUtility.GetShortFrameworkName(new FrameworkName(targetFrameworkName));
-         }
-         finally
-         {
-            if (appDomain != null)
-               RemoteAssemblyProxy.UnloadDomain(appDomain);
-         }
+         var targetFrameworkName = RemoteAssemblyProxy.ExecuteGetter<String>("TempPackageDomain", assemblyFile,
+            a => a.GetCustomAttribute<String>(
+               ad => ad.Constructor.DeclaringType == typeof(TargetFrameworkAttribute),
+               ad => (String)(ad.ConstructorArguments[0].Value)));
+         // TODO
+         // before .Net40, TargetFrameworkAttribute is not stored in the assembly, we should parse the .csproj file
+         // from libItem.GetMetadata("MSBuildSourceProjectFile")
+         //if (targetFrameworkName == null)
+         //{ }
+         return targetFrameworkName == null ? null : VersionUtility.GetShortFrameworkName(new FrameworkName(targetFrameworkName));
       }
 
       #region IPropertyProvider Implementation
