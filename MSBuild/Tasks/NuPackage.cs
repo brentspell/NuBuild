@@ -66,6 +66,15 @@ namespace NuBuild.MSBuild
       /// NuGet project
       /// </summary>
       public ITaskItem[] ReferenceLibraries { get; set; }
+      /// <summary>
+      /// Specifies whether to add binaries (.dll and .exe files) from referenced projects into subfolders
+      /// (eg. lib\net40) based on TargetFrameworkVersion 
+      /// </summary>
+      public Boolean AddBinariesToSubfolder { get; set; }
+      /// <summary>
+      /// Specifies whether to add .pdb files to binaries (.dll and .exe files) from referenced projects 
+      /// </summary>
+      public Boolean AddPdbFilesToBinaries { get; set; }
       #endregion
 
       /// <summary>
@@ -146,7 +155,7 @@ namespace NuBuild.MSBuild
                folder = "tools";
             if (folder == null)
                folder = "content";
-            else
+            else if (AddBinariesToSubfolder)
             {
                var frameworkFolder = GetShortTargetFrameworkName(libItem.GetMetadata("FullPath"));
                if (frameworkFolder != null)
@@ -164,6 +173,23 @@ namespace NuBuild.MSBuild
                   )
                }
             );
+            if (AddPdbFilesToBinaries && (ext == ".dll" || ext == ".exe"))
+            {
+               var pdbFile = Path.ChangeExtension(libItem.GetMetadata("FullPath"), ".pdb");
+               if (File.Exists(pdbFile))
+                  builder.Files.Add(
+                     new NuGet.PhysicalPackageFile()
+                     {
+                        SourcePath = pdbFile,
+                        TargetPath = String.Format(
+                           @"{0}\{1}{2}",
+                           folder,
+                           libItem.GetMetadata("Filename"),
+                           ".pdb"
+                        )
+                     }
+                  );
+            }
          }
       }
       /// <summary>

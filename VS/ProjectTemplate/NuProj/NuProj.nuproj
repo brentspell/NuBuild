@@ -5,6 +5,8 @@
       <OutputPath>Bin\</OutputPath>
       <NuBuildVersionSource>library</NuBuildVersionSource>
       <NuBuildVersionFileName>true</NuBuildVersionFileName>
+      <NuBuildAddBinariesToSubfolder>false</NuBuildAddBinariesToSubfolder>
+      <NuBuildAddPdbFilesToBinaries>false</NuBuildAddPdbFilesToBinaries>
    </PropertyGroup>
    <PropertyGroup Condition="'$(Configuration)' == 'Debug'"></PropertyGroup>
    <PropertyGroup Condition="'$(Configuration)' == 'Release'"></PropertyGroup>

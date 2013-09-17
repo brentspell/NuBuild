@@ -44,6 +44,8 @@ namespace NuBuild.VS
       private String outputPath;
       private VersionSource versionSource;
       private Boolean versionFileName;
+      private Boolean addBinariesToSubfolder;
+      private Boolean addPdbFilesToBinaries;
 
       /// <summary>
       /// Initializes a new property page instance
@@ -90,6 +92,30 @@ namespace NuBuild.VS
       }
 
       /// <summary>
+      /// Specifies whether to add binaries (.dll and .exe files) from referenced projects into subfolders (eg. lib\net40) based on TargetFrameworkVersion.
+      /// </summary>
+      [Category("Advanced")]
+      [DisplayName("Add Binaries To Subfolder")]
+      [Description(@"Specifies whether to add binaries (.dll and .exe files) from referenced projects into subfolders (eg. lib\net40) based on TargetFrameworkVersion.")]
+      public Boolean AddBinariesToSubfolder
+      {
+         get { return this.addBinariesToSubfolder; }
+         set { this.addBinariesToSubfolder = value; this.IsDirty = true; }
+      }
+
+      /// <summary>
+      /// Specifies whether to add .pdb files to binaries (.dll and .exe files) from referenced projects.
+      /// </summary>
+      [Category("Advanced")]
+      [DisplayName("Add PDB Files To Binaries")]
+      [Description(@"Specifies whether to add .pdb files to binaries (.dll and .exe files) from referenced projects.")]
+      public Boolean AddPdbFilesToBinaries
+      {
+         get { return this.addPdbFilesToBinaries; }
+         set { this.addPdbFilesToBinaries = value; this.IsDirty = true; }
+      }
+
+      /// <summary>
       /// Retrieves property values from the project file
       /// </summary>
       protected override void BindProperties ()
@@ -105,6 +131,12 @@ namespace NuBuild.VS
          );
          this.versionFileName = Boolean.Parse(
             this.ProjectMgr.GetProjectProperty("NuBuildVersionFileName")
+         );
+         this.addBinariesToSubfolder = Boolean.Parse(
+            this.ProjectMgr.GetProjectProperty("NuBuildAddBinariesToSubfolder")
+         );
+         this.addPdbFilesToBinaries = Boolean.Parse(
+            this.ProjectMgr.GetProjectProperty("NuBuildAddPdbFilesToBinaries")
          );
       }
       /// <summary>
@@ -127,6 +159,14 @@ namespace NuBuild.VS
          this.ProjectMgr.SetProjectProperty(
             "NuBuildVersionFileName",
             this.versionFileName.ToString()
+         );
+         this.ProjectMgr.SetProjectProperty(
+            "NuBuildAddBinariesToSubfolder",
+            this.addBinariesToSubfolder.ToString()
+         );
+         this.ProjectMgr.SetProjectProperty(
+            "NuBuildAddPdbFilesToBinaries",
+            this.addPdbFilesToBinaries.ToString()
          );
          this.IsDirty = false;
          return VSConstants.S_OK;
