@@ -213,7 +213,7 @@ namespace NuBuild.MSBuild
                }
                catch { }
                if (asm != null)
-                  id = asm.GetName().Name;
+                  return asm.GetName().Name;
             }
          }
          return id;
