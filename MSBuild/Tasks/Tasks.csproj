@@ -50,6 +50,7 @@
     </Compile>
     <Compile Include="NuPrepare.cs" />
     <Compile Include="NuPackage.cs" />
+    <Compile Include="RemoteAssembly.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.csproj">
