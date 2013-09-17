@@ -111,7 +111,7 @@ namespace NuBuild.MSBuild
             .Where(ad => ad.Constructor.DeclaringType == typeof(AssemblyDescriptionAttribute))
             .Select(ad => (String)(ad.ConstructorArguments[0].Value))
             .FirstOrDefault();
-         // retrieve the assembly description attribute
+         // retrieve the assembly target framework attribute
          var target = CustomAttributeData.GetCustomAttributes(asm)
             .Where(ad => ad.Constructor.DeclaringType == typeof(TargetFrameworkAttribute))
             .Select(ad => (String)(ad.ConstructorArguments[0].Value))
