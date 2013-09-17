@@ -206,14 +206,16 @@ namespace NuBuild.MSBuild
          {
             foreach (var libItem in this.ReferenceLibraries)
             {
-               var asm = (Assembly)null;
+               var assemblyName = (String)null;
                try
                {
-                  asm = Assembly.Load(File.ReadAllBytes(libItem.GetMetadata("FullPath")));
+                  assemblyName = RemoteAssemblyProxy.ExecuteGetter<String>("TempPackageDomain", libItem.GetMetadata("FullPath"),
+                      ra => ra.GetPropertyValue<String>(
+                         a => a.GetName().Name));
                }
                catch { }
-               if (asm != null)
-                  return asm.GetName().Name;
+               if (assemblyName != null)
+                  return assemblyName;
             }
          }
          return id;

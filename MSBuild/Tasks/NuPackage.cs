@@ -175,7 +175,7 @@ namespace NuBuild.MSBuild
       private String GetShortTargetFrameworkName(String assemblyFile)
       {
          var targetFrameworkName = RemoteAssemblyProxy.ExecuteGetter<String>("TempPackageDomain", assemblyFile,
-            a => a.GetCustomAttribute<String>(
+            ra => ra.GetCustomAttribute<String>(
                ad => ad.Constructor.DeclaringType == typeof(TargetFrameworkAttribute),
                ad => (String)(ad.ConstructorArguments[0].Value)));
          // TODO
@@ -203,36 +203,43 @@ namespace NuBuild.MSBuild
          // attempt to resolve the property from the referenced libraries
          foreach (var libItem in this.ReferenceLibraries)
          {
-            var asm = (Assembly)null;
+            var appDomain = (AppDomain)null;
             try
             {
-               asm = Assembly.Load(File.ReadAllBytes(libItem.GetMetadata("FullPath")));
-            }
-            catch { }
-            if (asm != null)
-            {
+               appDomain = RemoteAssemblyProxy.CreateDomain("TempPackageDomain");
+               var asm = new RemoteAssemblyProxy(appDomain);
+               asm.ReflectionOnlyLoadFrom(libItem.GetMetadata("FullPath"));
                if (property == "id")
-                  return asm.GetName().Name;
+                  return asm.GetPropertyValue<String>(ra => ra.GetName().Name);
                if (property == "version")
-                  if (asm.GetName().Version != new Version(0, 0, 0, 0))
-                     return asm.GetName().Version.ToString();
+               {
+                  var version = asm.GetPropertyValue<String>(ra => ra.GetName().Version.ToString());
+                  if (version != new Version(0, 0, 0, 0).ToString())
+                     return version;
+               }
                if (property == "author")
                {
-                  var attr = (AssemblyCompanyAttribute)asm
-                     .GetCustomAttributes(typeof(AssemblyCompanyAttribute), false)
-                     .FirstOrDefault();
+                  var attr = asm.GetCustomAttribute<String>(
+                     ad => ad.Constructor.DeclaringType == typeof(AssemblyCompanyAttribute),
+                     ad => (String)(ad.ConstructorArguments[0].Value));
                   if (attr != null)
-                     return attr.Company;
+                     return attr;
                }
                if (property == "description")
                {
-                  var attr = (AssemblyDescriptionAttribute)asm
-                     .GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false)
-                     .FirstOrDefault();
+                  var attr = asm.GetCustomAttribute<String>(
+                     ad => ad.Constructor.DeclaringType == typeof(AssemblyDescriptionAttribute),
+                     ad => (String)(ad.ConstructorArguments[0].Value)); 
                   if (attr != null)
-                     return attr.Description;
+                     return attr;
                }
             }
+            catch { }
+            finally
+            {
+               if (appDomain != null)
+                  RemoteAssemblyProxy.UnloadDomain(appDomain);
+            }            
          }
          // attempt to resolve the requested property
          // from the project properties
