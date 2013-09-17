@@ -3,7 +3,10 @@
   <PropertyGroup>
     <ProjectGuid>{f192b0ac-34d2-4405-acf6-d72f180956e5}</ProjectGuid>
     <OutputPath>..\Bin\</OutputPath>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <NuBuildVersionSource>Manual</NuBuildVersionSource>
+    <NuBuildVersionFileName>False</NuBuildVersionFileName>
+    <NuBuildIncludePdbs>False</NuBuildIncludePdbs>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
   </PropertyGroup>

@@ -3,8 +3,10 @@
    <PropertyGroup>
       <ProjectGuid>$guid1$</ProjectGuid>
       <OutputPath>Bin\</OutputPath>
+      <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
       <NuBuildVersionSource>library</NuBuildVersionSource>
       <NuBuildVersionFileName>true</NuBuildVersionFileName>
+      <NuBuildIncludePdbs>false</NuBuildIncludePdbs>
    </PropertyGroup>
    <PropertyGroup Condition="'$(Configuration)' == 'Debug'"></PropertyGroup>
    <PropertyGroup Condition="'$(Configuration)' == 'Release'"></PropertyGroup>

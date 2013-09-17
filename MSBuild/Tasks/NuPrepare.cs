@@ -48,6 +48,7 @@ namespace NuBuild.MSBuild
       private List<ITaskItem> sourceList = new List<ITaskItem>();
       private List<ITaskItem> targetList = new List<ITaskItem>();
       private VersionSource versionSource;
+      private AppDomain asmDomain;
 
       #region Task Parameters
       /// <summary>
@@ -114,6 +115,7 @@ namespace NuBuild.MSBuild
                this.ReferenceLibraries = new ITaskItem[0];
             this.OutputPath = Path.GetFullPath(this.OutputPath);
             Directory.CreateDirectory(this.OutputPath);
+            this.asmDomain = AppDomain.CreateDomain("NuBuild.MSBuild.NuPrepare.Domain");
             // add build dependencies from the nuspec file(s)
             // and the list of project references
             this.sourceList.AddRange(this.NuSpec);
@@ -135,6 +137,11 @@ namespace NuBuild.MSBuild
          {
             Log.LogError("{0} ({1})", e.Message, e.GetType().Name);
             return false;
+         }
+         finally
+         {
+            if (this.asmDomain != null)
+               AppDomain.Unload(this.asmDomain);
          }
          return true;
       }
@@ -206,14 +213,12 @@ namespace NuBuild.MSBuild
          {
             foreach (var libItem in this.ReferenceLibraries)
             {
-               var asm = (Assembly)null;
                try
                {
-                  asm = Assembly.Load(File.ReadAllBytes(libItem.GetMetadata("FullPath")));
+                  id = AssemblyReader.Read(libItem.GetMetadata("FullPath")).Name;
+                  break;
                }
                catch { }
-               if (asm != null)
-                  id = asm.GetName().Name;
             }
          }
          return id;

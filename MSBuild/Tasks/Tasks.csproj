@@ -50,6 +50,7 @@
     </Compile>
     <Compile Include="NuPrepare.cs" />
     <Compile Include="NuPackage.cs" />
+    <Compile Include="Utility\AssemblyReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.csproj">

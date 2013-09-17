@@ -31,6 +31,17 @@ using Microsoft.VisualStudio.Project;
 namespace NuBuild.VS
 {
    /// <summary>
+   /// Supported target framework versions
+   /// </summary>
+   public enum TargetFramework
+   {
+      [Description(".NET Framework 4.0")]
+      Net40,
+      [Description(".NET Framework 4.5")]
+      Net45
+   }
+
+   /// <summary>
    /// NuGet property page
    /// </summary>
    /// <remarks>
@@ -44,6 +55,8 @@ namespace NuBuild.VS
       private String outputPath;
       private VersionSource versionSource;
       private Boolean versionFileName;
+      private Boolean includePdbs;
+      private TargetFramework targetFramework;
 
       /// <summary>
       /// Initializes a new property page instance
@@ -51,6 +64,19 @@ namespace NuBuild.VS
       public NuBuildPropertyPage ()
       {
          this.Name = "NuGet";
+      }
+
+      /// <summary>
+      /// Specifies the project's target .NET framework version
+      /// </summary>
+      [Category("Package Generation")]
+      [DisplayName("Target Framework")]
+      [Description("Specifies the project's target framework.")]
+      [PropertyPageTypeConverter(typeof(EnumDescriptionTypeConverter<TargetFramework>))]
+      public TargetFramework TargetFramework
+      {
+         get { return this.targetFramework; }
+         set { this.targetFramework = value; this.IsDirty = true; }
       }
 
       /// <summary>
@@ -90,10 +116,27 @@ namespace NuBuild.VS
       }
 
       /// <summary>
+      /// Specifies whether to include PDBs for referenced assemblies
+      /// </summary>
+      [Category("Package Generation")]
+      [DisplayName("Include PDBs")]
+      [Description("Specifies whether to include PDBs for referenced assemblies.")]
+      public Boolean IncludePdbs
+      {
+         get { return this.includePdbs; }
+         set { this.includePdbs = value; this.IsDirty = true; }
+      }
+
+      /// <summary>
       /// Retrieves property values from the project file
       /// </summary>
       protected override void BindProperties ()
       {
+         var targetFwStr = this.ProjectMgr.GetProjectProperty("TargetFrameworkVersion");
+         if (targetFwStr == "v4.0")
+            this.targetFramework = VS.TargetFramework.Net40;
+         else
+            this.targetFramework = VS.TargetFramework.Net45;
          this.outputPath = this.ProjectMgr.GetProjectProperty(
             "OutputPath", 
             true
@@ -106,6 +149,9 @@ namespace NuBuild.VS
          this.versionFileName = Boolean.Parse(
             this.ProjectMgr.GetProjectProperty("NuBuildVersionFileName")
          );
+         this.includePdbs = Boolean.Parse(
+            this.ProjectMgr.GetProjectProperty("NuBuildIncludePdbs")
+         );
       }
       /// <summary>
       /// Assigns property values to the project file
@@ -116,6 +162,19 @@ namespace NuBuild.VS
       /// </returns>
       protected override Int32 ApplyChanges ()
       {
+         var targetFwStr = "v4.5";
+         switch (this.targetFramework)
+         {
+            case VS.TargetFramework.Net40:
+               targetFwStr = "v4.0";
+               break;
+            default:
+               break;
+         }
+         this.ProjectMgr.SetProjectProperty(
+            "TargetFrameworkVersion",
+            targetFwStr
+         );
          this.ProjectMgr.SetProjectProperty(
             "OutputPath", 
             this.outputPath
@@ -127,6 +186,10 @@ namespace NuBuild.VS
          this.ProjectMgr.SetProjectProperty(
             "NuBuildVersionFileName",
             this.versionFileName.ToString()
+         );
+         this.ProjectMgr.SetProjectProperty(
+            "NuBuildIncludePdbs",
+            this.includePdbs.ToString()
          );
          this.IsDirty = false;
          return VSConstants.S_OK;

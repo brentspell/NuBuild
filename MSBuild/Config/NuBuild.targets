@@ -6,6 +6,7 @@
    <PropertyGroup>
       <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
       <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+      <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v4.5</TargetFrameworkVersion>
       <!-- Property: NuBuildVersionSource
          . specifies whether/how the package version string is generated
          . Manual:   manage in .nuspec file by hand
@@ -18,6 +19,11 @@
            package file name
       -->
       <NuBuildVersionFileName Condition="'$(NuBuildVersionFileName)' == ''">false</NuBuildVersionFileName>
+      <!-- Properties: NuBuildIncludePdbs
+         . specifies whether to automatically add PDB files for assemblies
+           automatically added to the package
+      -->
+      <NuBuildIncludePdbs Condition="'$(NuBuildIncludePdbs)' == ''">false</NuBuildIncludePdbs>
    </PropertyGroup>
    <!-- Target: Prepare 
       . initializes the Compile build items, adding custom metadata
@@ -61,7 +67,8 @@
       <NuPackage ProjectPath="$(MSBuildProjectFullPath)"
                  NuSpec="@(NuPrepared)"
                  OutputPath="$(OutputPath)"
-                 ReferenceLibraries="@(__ReferenceLibraries)"/>
+                 ReferenceLibraries="@(__ReferenceLibraries)"
+                 IncludePdbs="$(NuBuildIncludePdbs)"/>
       <Message Text="%(NuPrepared.Filename) -> %(NuPrepared.NuPackagePath)" Importance="high"/>
       <CallTarget Targets="AfterBuild"/>
    </Target>

@@ -17,7 +17,7 @@ Once you have installed NuGet and NuBuild, simply click **File**->**New Project*
 
 ![Project Properties](https://raw.github.com/wiki/bspell1/nubuild/projprop.png)
 
-Right-click the project and select **Properties** to configure the output path for your NuGet package and the optional version generator (see below). Then, you are ready to configure your package. Either edit the .nuspec file directly or use the excellent [NuGet Package Explorer](http://npe.codeplex.com/) to configure your package's properties.
+Right-click the project and select **Properties** to change the build configuration for your NuBuild project. Then, either edit the .nuspec file directly or use the excellent [NuGet Package Explorer](http://npe.codeplex.com/) to configure your package's properties.
 
 ##Versioning##
 NuBuild supports the following options for generating NuGet package version numbers.
