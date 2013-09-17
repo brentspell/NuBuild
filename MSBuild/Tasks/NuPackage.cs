@@ -119,7 +119,7 @@ namespace NuBuild.MSBuild
             specPath,
             this as NuGet.IPropertyProvider,
             true
-            );
+         );
          // initialize dynamic manifest properties
          var version = specItem.GetMetadata("NuPackageVersion");
          if (!String.IsNullOrEmpty(version))
@@ -200,9 +200,9 @@ namespace NuBuild.MSBuild
                            tgtFolder,
                            Path.GetFileName(pdbPath)
                         )
-         }
+                     }
                   );
-      }
+            }
          }
       }
       /// <summary>
@@ -216,7 +216,7 @@ namespace NuBuild.MSBuild
       /// Null otherwise
       /// </returns>
       private String GetProjectProperty (String name)
-               {
+      {
          // attempt to resolve the requested property
          // from the project properties
          if (this.propertyProject == null)
