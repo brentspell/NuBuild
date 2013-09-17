@@ -31,6 +31,17 @@ using Microsoft.VisualStudio.Project;
 namespace NuBuild.VS
 {
    /// <summary>
+   /// Supported target framework versions
+   /// </summary>
+   public enum TargetFramework
+   {
+      [Description(".NET Framework 4.0")]
+      Net40,
+      [Description(".NET Framework 4.5")]
+      Net45
+   }
+
+   /// <summary>
    /// NuGet property page
    /// </summary>
    /// <remarks>
@@ -45,7 +56,8 @@ namespace NuBuild.VS
       private VersionSource versionSource;
       private Boolean versionFileName;
       private Boolean addBinariesToSubfolder;
-      private Boolean addPdbFilesToBinaries;
+      private Boolean includePdbs;
+      private TargetFramework targetFramework;
 
       /// <summary>
       /// Initializes a new property page instance
@@ -53,6 +65,19 @@ namespace NuBuild.VS
       public NuBuildPropertyPage ()
       {
          this.Name = "NuGet";
+      }
+
+      /// <summary>
+      /// Specifies the project's target .NET framework version
+      /// </summary>
+      [Category("Package Generation")]
+      [DisplayName("Target Framework")]
+      [Description("Specifies the project's target framework.")]
+      [PropertyPageTypeConverter(typeof(EnumDescriptionTypeConverter<TargetFramework>))]
+      public TargetFramework TargetFramework
+      {
+         get { return this.targetFramework; }
+         set { this.targetFramework = value; this.IsDirty = true; }
       }
 
       /// <summary>
@@ -92,11 +117,11 @@ namespace NuBuild.VS
       }
 
       /// <summary>
-      /// Specifies whether to add binaries (.dll and .exe files) from referenced projects into subfolders (eg. lib\net40) based on TargetFrameworkVersion.
+      /// Specifies whether to add referenced assemblies into subfolders based on the assembly's TargetFramework.
       /// </summary>
       [Category("Advanced")]
       [DisplayName("Add Binaries To Subfolder")]
-      [Description(@"Specifies whether to add binaries (.dll and .exe files) from referenced projects into subfolders (eg. lib\net40) based on TargetFrameworkVersion.")]
+      [Description(@"Specifies whether to add referenced assemblies into subfolders based on the assembly's TargetFramework.")]
       public Boolean AddBinariesToSubfolder
       {
          get { return this.addBinariesToSubfolder; }
@@ -104,15 +129,15 @@ namespace NuBuild.VS
       }
 
       /// <summary>
-      /// Specifies whether to add .pdb files to binaries (.dll and .exe files) from referenced projects.
+      /// Specifies whether to include PDBs for referenced assemblies
       /// </summary>
       [Category("Advanced")]
-      [DisplayName("Add PDB Files To Binaries")]
-      [Description(@"Specifies whether to add .pdb files to binaries (.dll and .exe files) from referenced projects.")]
-      public Boolean AddPdbFilesToBinaries
+      [DisplayName("Include PDBs")]
+      [Description("Specifies whether to include PDBs for referenced assemblies.")]
+      public Boolean IncludePdbs
       {
-         get { return this.addPdbFilesToBinaries; }
-         set { this.addPdbFilesToBinaries = value; this.IsDirty = true; }
+         get { return this.includePdbs; }
+         set { this.includePdbs = value; this.IsDirty = true; }
       }
 
       /// <summary>
@@ -120,6 +145,11 @@ namespace NuBuild.VS
       /// </summary>
       protected override void BindProperties ()
       {
+         var targetFwStr = this.ProjectMgr.GetProjectProperty("TargetFrameworkVersion");
+         if (targetFwStr == "v4.0")
+            this.targetFramework = VS.TargetFramework.Net40;
+         else
+            this.targetFramework = VS.TargetFramework.Net45;
          this.outputPath = this.ProjectMgr.GetProjectProperty(
             "OutputPath", 
             true
@@ -135,8 +165,8 @@ namespace NuBuild.VS
          this.addBinariesToSubfolder = Boolean.Parse(
             this.ProjectMgr.GetProjectProperty("NuBuildAddBinariesToSubfolder")
          );
-         this.addPdbFilesToBinaries = Boolean.Parse(
-            this.ProjectMgr.GetProjectProperty("NuBuildAddPdbFilesToBinaries")
+         this.includePdbs = Boolean.Parse(
+            this.ProjectMgr.GetProjectProperty("NuBuildIncludePdbs")
          );
       }
       /// <summary>
@@ -148,6 +178,19 @@ namespace NuBuild.VS
       /// </returns>
       protected override Int32 ApplyChanges ()
       {
+         var targetFwStr = "v4.5";
+         switch (this.targetFramework)
+         {
+            case VS.TargetFramework.Net40:
+               targetFwStr = "v4.0";
+               break;
+            default:
+               break;
+         }
+         this.ProjectMgr.SetProjectProperty(
+            "TargetFrameworkVersion",
+            targetFwStr
+         );
          this.ProjectMgr.SetProjectProperty(
             "OutputPath", 
             this.outputPath
@@ -165,8 +208,8 @@ namespace NuBuild.VS
             this.addBinariesToSubfolder.ToString()
          );
          this.ProjectMgr.SetProjectProperty(
-            "NuBuildAddPdbFilesToBinaries",
-            this.addPdbFilesToBinaries.ToString()
+            "NuBuildIncludePdbs",
+            this.includePdbs.ToString()
          );
          this.IsDirty = false;
          return VSConstants.S_OK;

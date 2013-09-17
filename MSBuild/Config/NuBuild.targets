@@ -11,6 +11,7 @@
    <PropertyGroup>
       <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
       <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+      <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v4.5</TargetFrameworkVersion>
       <!-- Property: NuBuildVersionSource
          . specifies whether/how the package version string is generated
          . Manual:   manage in .nuspec file by hand
@@ -23,6 +24,16 @@
            package file name
       -->
       <NuBuildVersionFileName Condition="'$(NuBuildVersionFileName)' == ''">false</NuBuildVersionFileName>
+      <!-- Properties: NuBuildIncludePdbs
+         . specifies whether to automatically add PDB files for assemblies
+           automatically added to the package
+      -->
+      <NuBuildIncludePdbs Condition="'$(NuBuildIncludePdbs)' == ''">false</NuBuildIncludePdbs>
+      <!-- Properties: NuBuildAddBinariesToSubfolder
+         . specifies whether to add binaries (.dll and .exe files) from referenced projects into subfolders
+		   (eg. lib\net40) based on TargetFrameworkVersion
+      -->
+      <NuBuildAddBinariesToSubfolder Condition="'$(NuBuildAddBinariesToSubfolder)' == ''">false</NuBuildAddBinariesToSubfolder>
    </PropertyGroup>
    <!-- Target: Prepare 
       . initializes the Compile build items, adding custom metadata
@@ -68,7 +79,7 @@
                  OutputPath="$(OutputPath)"
                  ReferenceLibraries="@(__ReferenceLibraries)"
                  AddBinariesToSubfolder="$(NuBuildAddBinariesToSubfolder)"
-                 AddPdbFilesToBinaries="$(NuBuildAddPdbFilesToBinaries)"/>
+                 IncludePdbs="$(NuBuildIncludePdbs)"/>
       <Message Text="%(NuPrepared.Filename) -> %(NuPrepared.NuPackagePath)" Importance="high"/>
       <CallTarget Targets="AfterBuild"/>
    </Target>

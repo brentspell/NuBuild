@@ -72,9 +72,10 @@ namespace NuBuild.MSBuild
       /// </summary>
       public Boolean AddBinariesToSubfolder { get; set; }
       /// <summary>
-      /// Specifies whether to add .pdb files to binaries (.dll and .exe files) from referenced projects 
+      /// Specifies whether to add PDB files for binaries
+      /// automatically to the package
       /// </summary>
-      public Boolean AddPdbFilesToBinaries { get; set; }
+      public Boolean IncludePdbs { get; set; }
       #endregion
 
       /// <summary>
@@ -114,12 +115,10 @@ namespace NuBuild.MSBuild
          // load the package manifest (nuspec) from the task item
          // using the nuget package builder
          var specPath = specItem.GetMetadata("FullPath");
-         var builder = (NuGet.PackageBuilder)null;
-         using (var specFile = File.OpenRead(specPath))
-            builder = new NuGet.PackageBuilder(
-               specFile,
-               Path.GetDirectoryName(specPath),
-               this as NuGet.IPropertyProvider
+         var builder = new NuGet.PackageBuilder(
+            specPath,
+            this as NuGet.IPropertyProvider,
+            true
             );
          // initialize dynamic manifest properties
          var version = specItem.GetMetadata("NuPackageVersion");
@@ -145,128 +144,79 @@ namespace NuBuild.MSBuild
          // . DLL references go in the lib package folder
          // . EXE references go in the tools package folder
          // . everything else goes in the content package folder
+         // . folders may be overridden using NuBuildTargetFolder metadata (lib\net40, etc.)
+         // . folders may be overridden using TargetFramework attribute (lib\net40, etc.)
          foreach (var libItem in this.ReferenceLibraries)
          {
-            var ext = libItem.GetMetadata("Extension").ToLower();
-            var folder = (String)null;
-            if (ext == ".dll")
-               folder = "lib";
-            else if (ext == ".exe")
-               folder = "tools";
-            if (folder == null)
-               folder = "content";
-            else if (AddBinariesToSubfolder)
+            var srcPath = libItem.GetMetadata("FullPath");
+            var srcExt = Path.GetExtension(srcPath).ToLower();
+            var tgtFolder = "content";
+            var hasPdb = false;
+            if (srcExt == ".dll")
             {
-               var frameworkFolder = GetShortTargetFrameworkName(libItem.GetMetadata("FullPath"));
-               if (frameworkFolder != null)
-                  folder = Path.Combine(folder, frameworkFolder);
+               tgtFolder = "lib";
+               hasPdb = true;
             }
+            else if (srcExt == ".exe")
+            {
+               tgtFolder = "tools";
+               hasPdb = true;
+            }
+            // apply the custom folder override on the reference, or based on TargetFramework
+            var customFolder = libItem.GetMetadata("NuBuildTargetFolder");
+            if (!String.IsNullOrWhiteSpace(customFolder))
+               tgtFolder = customFolder;
+            else if (AddBinariesToSubfolder)
+               try
+               {
+                  var targetFrameworkName = AssemblyReader.Read(srcPath).TargetFrameworkName;
+                  if (!String.IsNullOrWhiteSpace(targetFrameworkName))
+                     tgtFolder = Path.Combine(tgtFolder, VersionUtility.GetShortFrameworkName(new FrameworkName(targetFrameworkName)));
+               }
+               catch { }
+            // add the source library file to the package
             builder.Files.Add(
                new NuGet.PhysicalPackageFile()
                {
-                  SourcePath = libItem.GetMetadata("FullPath"),
+                  SourcePath = srcPath,
                   TargetPath = String.Format(
-                     @"{0}\{1}{2}",
-                     folder,
-                     libItem.GetMetadata("Filename"),
-                     libItem.GetMetadata("Extension")
+                     @"{0}\{1}",
+                     tgtFolder,
+                     Path.GetFileName(srcPath)
                   )
                }
             );
-            if (AddPdbFilesToBinaries && (ext == ".dll" || ext == ".exe"))
+            // add PDBs if specified and exist
+            if (hasPdb && this.IncludePdbs)
             {
-               var pdbFile = Path.ChangeExtension(libItem.GetMetadata("FullPath"), ".pdb");
-               if (File.Exists(pdbFile))
+               var pdbPath = Path.ChangeExtension(srcPath, ".pdb");
+               if (File.Exists(pdbPath))
                   builder.Files.Add(
                      new NuGet.PhysicalPackageFile()
                      {
-                        SourcePath = pdbFile,
+                        SourcePath = pdbPath,
                         TargetPath = String.Format(
-                           @"{0}\{1}{2}",
-                           folder,
-                           libItem.GetMetadata("Filename"),
-                           ".pdb"
+                           @"{0}\{1}",
+                           tgtFolder,
+                           Path.GetFileName(pdbPath)
                         )
-                     }
+         }
                   );
-            }
+      }
          }
       }
       /// <summary>
-      /// Returns the NuGet like short version of the TargetFramework custom attribute.
+      /// Retrieves a property from the current NuGet project file
       /// </summary>
-      /// <param name="assemblyFile">
-      /// The path of the file that contains the manifest of the assembly.
-      /// </param>
-      private String GetShortTargetFrameworkName(String assemblyFile)
-      {
-         var targetFrameworkName = RemoteAssemblyProxy.ExecuteGetter<String>("TempPackageDomain", assemblyFile,
-            ra => ra.GetCustomAttribute<String>(
-               ad => ad.Constructor.DeclaringType == typeof(TargetFrameworkAttribute),
-               ad => (String)(ad.ConstructorArguments[0].Value)));
-         // TODO
-         // before .Net40, TargetFrameworkAttribute is not stored in the assembly, we should parse the .csproj file
-         // from libItem.GetMetadata("MSBuildSourceProjectFile")
-         //if (targetFrameworkName == null)
-         //{ }
-         return targetFrameworkName == null ? null : VersionUtility.GetShortFrameworkName(new FrameworkName(targetFrameworkName));
-      }
-
-      #region IPropertyProvider Implementation
-      /// <summary>
-      /// Retrieves nuget replacement values from a referenced
-      /// assembly library or MSBuild property, as specified here:
-      /// http://docs.nuget.org/docs/reference/nuspec-reference#Replacement_Tokens
-      /// </summary>
-      /// <param name="property">
-      /// The replacement property to retrieve
+      /// <param name="name">
+      /// The name of the property to retrieve
       /// </param>
       /// <returns>
-      /// The replacement property value
+      /// The specified property value if found
+      /// Null otherwise
       /// </returns>
-      public dynamic GetPropertyValue (String property)
-      {
-         // attempt to resolve the property from the referenced libraries
-         foreach (var libItem in this.ReferenceLibraries)
-         {
-            var appDomain = (AppDomain)null;
-            try
-            {
-               appDomain = RemoteAssemblyProxy.CreateDomain("TempPackageDomain");
-               var asm = new RemoteAssemblyProxy(appDomain);
-               asm.ReflectionOnlyLoadFrom(libItem.GetMetadata("FullPath"));
-               if (property == "id")
-                  return asm.GetPropertyValue<String>(ra => ra.GetName().Name);
-               if (property == "version")
+      private String GetProjectProperty (String name)
                {
-                  var version = asm.GetPropertyValue<String>(ra => ra.GetName().Version.ToString());
-                  if (version != new Version(0, 0, 0, 0).ToString())
-                     return version;
-               }
-               if (property == "author")
-               {
-                  var attr = asm.GetCustomAttribute<String>(
-                     ad => ad.Constructor.DeclaringType == typeof(AssemblyCompanyAttribute),
-                     ad => (String)(ad.ConstructorArguments[0].Value));
-                  if (attr != null)
-                     return attr;
-               }
-               if (property == "description")
-               {
-                  var attr = asm.GetCustomAttribute<String>(
-                     ad => ad.Constructor.DeclaringType == typeof(AssemblyDescriptionAttribute),
-                     ad => (String)(ad.ConstructorArguments[0].Value)); 
-                  if (attr != null)
-                     return attr;
-               }
-            }
-            catch { }
-            finally
-            {
-               if (appDomain != null)
-                  RemoteAssemblyProxy.UnloadDomain(appDomain);
-            }            
-         }
          // attempt to resolve the requested property
          // from the project properties
          if (this.propertyProject == null)
@@ -313,10 +263,46 @@ namespace NuBuild.MSBuild
          }
          if (this.propertyProject != null)
             return this.propertyProject.AllEvaluatedProperties
-               .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.Name, property) == 0)
+               .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.Name, name) == 0)
                .Select(p => p.EvaluatedValue)
                .FirstOrDefault();
          return null;
+      }
+
+      #region IPropertyProvider Implementation
+      /// <summary>
+      /// Retrieves nuget replacement values from a referenced
+      /// assembly library or MSBuild property, as specified here:
+      /// http://docs.nuget.org/docs/reference/nuspec-reference#Replacement_Tokens
+      /// </summary>
+      /// <param name="property">
+      /// The replacement property to retrieve
+      /// </param>
+      /// <returns>
+      /// The replacement property value
+      /// </returns>
+      public dynamic GetPropertyValue (String property)
+      {
+         // attempt to resolve the property from the referenced libraries
+         foreach (var libItem in this.ReferenceLibraries)
+         {
+            try
+            {
+               var props = AssemblyReader.Read(libItem.GetMetadata("FullPath"));
+               if (property == "id")
+                  return props.Name;
+               if (property == "version" && props.Version != null)
+                  return props.Version.ToString();
+               if (property == "description")
+                  return props.Description;
+               if (property == "author")
+                  return props.Company;
+            }
+            catch { }
+         }
+         // if the property was not yet resolved, retrieve it
+         // from the project properties
+         return GetProjectProperty(property);
       }
       #endregion
    }

@@ -37,7 +37,7 @@
     </Reference>
     <Reference Include="NuGet.Core, Version=2.7.40808.167, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\NuGet.Core.2.7.0\lib\net40-Client\NuGet.Core.dll</HintPath>
+      <HintPath>..\..\packages\Nuget.Core.2.7.0\lib\net40-Client\NuGet.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
@@ -50,7 +50,7 @@
     </Compile>
     <Compile Include="NuPrepare.cs" />
     <Compile Include="NuPackage.cs" />
-    <Compile Include="RemoteAssembly.cs" />
+    <Compile Include="Utility\AssemblyReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.csproj">

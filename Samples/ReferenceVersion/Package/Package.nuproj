@@ -3,7 +3,9 @@
   <PropertyGroup>
     <ProjectGuid>{90B0A935-D903-4CF5-9E87-BC7B82EE0F52}</ProjectGuid>
     <OutputPath>..\Bin\</OutputPath>
-    <NuBuildVersionSource>library</NuBuildVersionSource>
+    <NuBuildVersionSource>Library</NuBuildVersionSource>
+    <NuBuildVersionFileName>False</NuBuildVersionFileName>
+    <NuBuildIncludePdbs>True</NuBuildIncludePdbs>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
   </PropertyGroup>
@@ -17,6 +19,7 @@
       <Name>Library</Name>
       <Project>{379a8017-488f-4234-b2d4-e0854ee6411f}</Project>
       <Private>True</Private>
+      <NuBuildTargetFolder>lib\net45</NuBuildTargetFolder>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\NuBuild\v1\NuBuild.targets" />
