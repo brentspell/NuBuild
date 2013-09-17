@@ -295,6 +295,8 @@ namespace NuBuild.MSBuild
                   return props.Version.ToString();
                if (property == "description")
                   return props.Description;
+               if (property == "copyright")
+                  return props.Copyright;
                if (property == "author")
                   return props.Company;
             }

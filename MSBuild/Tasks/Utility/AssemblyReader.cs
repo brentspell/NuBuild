@@ -111,6 +111,11 @@ namespace NuBuild.MSBuild
             .Where(ad => ad.Constructor.DeclaringType == typeof(AssemblyDescriptionAttribute))
             .Select(ad => (String)(ad.ConstructorArguments[0].Value))
             .FirstOrDefault();
+         // retrieve the assembly copyright attribute
+         var copy = CustomAttributeData.GetCustomAttributes(asm)
+            .Where(ad => ad.Constructor.DeclaringType == typeof(AssemblyCopyrightAttribute))
+            .Select(ad => (String)(ad.ConstructorArguments[0].Value))
+            .FirstOrDefault();
          // retrieve the assembly target framework attribute
          var target = CustomAttributeData.GetCustomAttributes(asm)
             .Where(ad => ad.Constructor.DeclaringType == typeof(TargetFrameworkAttribute))
@@ -122,6 +127,7 @@ namespace NuBuild.MSBuild
             Name = asm.GetName().Name,
             Version = ver,
             Description = desc,
+            Copyright = copy,
             Company = company,
             TargetFrameworkName = target
          };
@@ -137,6 +143,7 @@ namespace NuBuild.MSBuild
          public Version Version { get; set; }
          public String Company { get; set; }
          public String Description { get; set; }
+         public String Copyright { get; set; }
          public String TargetFrameworkName { get; set; }
       }
    }
