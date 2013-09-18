@@ -56,7 +56,7 @@
          <Output TaskParameter="Targets" ItemName="NuTargets"/>
       </NuPrepare>
       <ItemGroup>
-         <NuSources Include="@(NuSources);$(MSBuildProjectFile);"/>
+         <NuSources Include="$(MSBuildProjectFile);"/>
       </ItemGroup>
       <Message Text="NuSources: @(NuSources)"/>
       <Message Text="NuTargets: @(NuTargets)"/>
