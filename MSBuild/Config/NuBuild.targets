@@ -36,11 +36,28 @@
       -->
       <NuBuildAddBinariesToSubfolder Condition="'$(NuBuildAddBinariesToSubfolder)' == ''">false</NuBuildAddBinariesToSubfolder>
    </PropertyGroup>
+   <!-- Target: GetCopyToOutputDirectoryItems 
+      . determines additional files to output directory
+   -->
+   <Target Name="__GetCopyToOutputDirectoryItems"
+           Returns="@(CopyToOutputDirectoryItems)">
+      <AssignTargetPath Files="@(Content)" RootFolder="$(MSBuildProjectDirectory)">
+         <Output TaskParameter="AssignedFiles" ItemName="ContentWithTargetPath" />
+      </AssignTargetPath>
+      <ItemGroup>
+         <_SourceItemsToCopyToOutputDirectoryAlways KeepMetadata="CopyToOutputDirectory;TargetPath" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
+         <_SourceItemsToCopyToOutputDirectory       KeepMetadata="CopyToOutputDirectory;TargetPath" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
+      </ItemGroup>
+      <ItemGroup>
+         <CopyToOutputDirectoryItems                Include="@(_SourceItemsToCopyToOutputDirectoryAlways->'%(FullPath)');@(_SourceItemsToCopyToOutputDirectory->'%(FullPath)')"/>
+      </ItemGroup>
+   </Target>
    <!-- Target: Prepare 
       . initializes the Compile build items, adding custom metadata
       . generates the NuSources and NuTargets items for incremental building
    -->
-   <Target Name="__Prepare">
+   <Target Name="__Prepare"
+           DependsOnTargets="__GetCopyToOutputDirectoryItems">
       <MSBuild Projects="@(ProjectReference)" UseResultsCache="true">
          <Output TaskParameter="TargetOutputs" ItemName="__ReferenceLibraries" />
       </MSBuild>
@@ -56,7 +73,10 @@
          <Output TaskParameter="Targets" ItemName="NuTargets"/>
       </NuPrepare>
       <ItemGroup>
-         <NuSources Include="@(NuSources);$(MSBuildProjectFile);"/>
+         <NuSources Include="$(MSBuildProjectFile);"/>
+      </ItemGroup>
+      <ItemGroup>
+         <NuTargets Include="@(CopyToOutputDirectoryItems);"/>
       </ItemGroup>
       <Message Text="NuSources: @(NuSources)"/>
       <Message Text="NuTargets: @(NuTargets)"/>
@@ -82,7 +102,7 @@
                  AddBinariesToSubfolder="$(NuBuildAddBinariesToSubfolder)"
                  IncludePdbs="$(NuBuildIncludePdbs)"/>
       <Message Text="%(NuPrepared.Filename) -> %(NuPrepared.NuPackagePath)" Importance="high"/>
-      <CallTarget Targets="CopySourceItemsToOutputDirectory"/>
+      <CallTarget Targets="__CopySourceItemsToOutputDirectory"/>
       <CallTarget Targets="AfterBuild"/>
    </Target>
    <!-- Target: Rebuild 
@@ -93,18 +113,9 @@
    <!-- Target: CopySourceItemsToOutputDirectory 
       . copies additional files to output directory
    -->
-   <Target Name="CopySourceItemsToOutputDirectory"
-           DependsOnTargets="_GetCopyToOutputDirectoryItems;_CopyOutOfDateSourceItemsToOutputDirectory;_CopyOutOfDateSourceItemsToOutputDirectoryAlways"/>
-   <Target Name="_GetCopyToOutputDirectoryItems" >
-      <AssignTargetPath Files="@(Content)" RootFolder="$(MSBuildProjectDirectory)">
-         <Output TaskParameter="AssignedFiles" ItemName="ContentWithTargetPath" />
-      </AssignTargetPath>
-      <ItemGroup>
-         <_SourceItemsToCopyToOutputDirectoryAlways KeepMetadata="CopyToOutputDirectory;TargetPath" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
-         <_SourceItemsToCopyToOutputDirectory       KeepMetadata="CopyToOutputDirectory;TargetPath" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
-      </ItemGroup>
-   </Target>
-   <Target Name="_CopyOutOfDateSourceItemsToOutputDirectory"
+   <Target Name="__CopySourceItemsToOutputDirectory"
+           DependsOnTargets="__GetCopyToOutputDirectoryItems;__CopyOutOfDateSourceItemsToOutputDirectory;__CopyOutOfDateSourceItemsToOutputDirectoryAlways"/>
+   <Target Name="__CopyOutOfDateSourceItemsToOutputDirectory"
            Condition=" '@(_SourceItemsToCopyToOutputDirectory)' != '' "
            Inputs="@(_SourceItemsToCopyToOutputDirectory)"
            Outputs="@(_SourceItemsToCopyToOutputDirectory->'$(OutputPath)%(TargetPath)')">
@@ -112,7 +123,7 @@
             DestinationFiles = "@(_SourceItemsToCopyToOutputDirectory->'$(OutputPath)%(TargetPath)')"
             OverwriteReadOnlyFiles="true"/>
    </Target>
-   <Target Name="_CopyOutOfDateSourceItemsToOutputDirectoryAlways"
+   <Target Name="__CopyOutOfDateSourceItemsToOutputDirectoryAlways"
            Condition=" '@(_SourceItemsToCopyToOutputDirectoryAlways)' != '' ">
       <Copy SourceFiles = "@(_SourceItemsToCopyToOutputDirectoryAlways)"
             DestinationFiles = "@(_SourceItemsToCopyToOutputDirectoryAlways->'$(OutputPath)%(TargetPath)')"
