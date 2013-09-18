@@ -31,7 +31,7 @@
       <NuBuildIncludePdbs Condition="'$(NuBuildIncludePdbs)' == ''">false</NuBuildIncludePdbs>
       <!-- Properties: NuBuildAddBinariesToSubfolder
          . specifies whether to add binaries (.dll and .exe files) from referenced projects into subfolders
-		   (eg. lib\net40) based on TargetFrameworkVersion
+         (eg. lib\net40) based on TargetFrameworkVersion
       -->
       <NuBuildAddBinariesToSubfolder Condition="'$(NuBuildAddBinariesToSubfolder)' == ''">false</NuBuildAddBinariesToSubfolder>
    </PropertyGroup>
@@ -81,12 +81,41 @@
                  AddBinariesToSubfolder="$(NuBuildAddBinariesToSubfolder)"
                  IncludePdbs="$(NuBuildIncludePdbs)"/>
       <Message Text="%(NuPrepared.Filename) -> %(NuPrepared.NuPackagePath)" Importance="high"/>
+      <CallTarget Targets="CopySourceItemsToOutputDirectory"/>
       <CallTarget Targets="AfterBuild"/>
    </Target>
    <!-- Target: Rebuild 
       . runs a clean and then a build
    -->
    <Target Name="Rebuild" DependsOnTargets="Clean;Build;">
+   </Target>
+   <!-- Target: CopySourceItemsToOutputDirectory 
+      . copies additional files to output directory
+   -->
+   <Target Name="CopySourceItemsToOutputDirectory"
+           DependsOnTargets="_GetCopyToOutputDirectoryItems;_CopyOutOfDateSourceItemsToOutputDirectory;_CopyOutOfDateSourceItemsToOutputDirectoryAlways"/>
+   <Target Name="_GetCopyToOutputDirectoryItems" >
+      <AssignTargetPath Files="@(Content)" RootFolder="$(MSBuildProjectDirectory)">
+         <Output TaskParameter="AssignedFiles" ItemName="ContentWithTargetPath" />
+      </AssignTargetPath>
+      <ItemGroup>
+         <_SourceItemsToCopyToOutputDirectoryAlways KeepMetadata="CopyToOutputDirectory;TargetPath" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
+         <_SourceItemsToCopyToOutputDirectory       KeepMetadata="CopyToOutputDirectory;TargetPath" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
+      </ItemGroup>
+   </Target>
+   <Target Name="_CopyOutOfDateSourceItemsToOutputDirectory"
+           Condition=" '@(_SourceItemsToCopyToOutputDirectory)' != '' "
+           Inputs="@(_SourceItemsToCopyToOutputDirectory)"
+           Outputs="@(_SourceItemsToCopyToOutputDirectory->'$(OutputPath)%(TargetPath)')">
+      <Copy SourceFiles = "@(_SourceItemsToCopyToOutputDirectory)"
+            DestinationFiles = "@(_SourceItemsToCopyToOutputDirectory->'$(OutputPath)%(TargetPath)')"
+            OverwriteReadOnlyFiles="true"/>
+   </Target>
+   <Target Name="_CopyOutOfDateSourceItemsToOutputDirectoryAlways"
+           Condition=" '@(_SourceItemsToCopyToOutputDirectoryAlways)' != '' ">
+      <Copy SourceFiles = "@(_SourceItemsToCopyToOutputDirectoryAlways)"
+            DestinationFiles = "@(_SourceItemsToCopyToOutputDirectoryAlways->'$(OutputPath)%(TargetPath)')"
+            OverwriteReadOnlyFiles="true"/>
    </Target>
    <!-- Dummy targets required for Visual Studio -->
    <Target Name="GetFrameworkPaths"/>
