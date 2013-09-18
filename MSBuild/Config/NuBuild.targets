@@ -9,6 +9,7 @@
    </PropertyGroup>
    <!-- NuBuild Properties -->
    <PropertyGroup>
+      <OutputPath Condition="'$(OutputPath)' != '' and !HasTrailingSlash('$(OutputPath)')">$(OutputPath)\</OutputPath>
       <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
       <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
       <TargetFrameworkVersion Condition="'$(TargetFrameworkVersion)' == ''">v4.5</TargetFrameworkVersion>
