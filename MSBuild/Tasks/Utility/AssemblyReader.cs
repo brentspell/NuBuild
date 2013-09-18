@@ -25,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Runtime.Versioning;
 // Project References
 
 namespace NuBuild.MSBuild
@@ -79,7 +80,8 @@ namespace NuBuild.MSBuild
          }
          finally
          {
-            AppDomain.Unload(domain);
+            if (domain != null)
+               AppDomain.Unload(domain);
          }
       }
       /// <summary>
@@ -94,32 +96,40 @@ namespace NuBuild.MSBuild
       /// </returns>
       private Properties ReadAssembly (String path)
       {
-         var asm = Assembly.Load(File.ReadAllBytes(path));
+         var asm = Assembly.ReflectionOnlyLoad(File.ReadAllBytes(path));
          // retrieve the assembly version
          var ver = asm.GetName().Version;
          if (ver == new Version(0, 0, 0, 0))
             ver = null;
          // retrieve the assembly company attribute
-         var company = (String)null;
-         var companyAttr = (AssemblyCompanyAttribute)asm
-            .GetCustomAttributes(typeof(AssemblyCompanyAttribute), false)
+         var company = CustomAttributeData.GetCustomAttributes(asm)
+            .Where(ad => ad.Constructor.DeclaringType == typeof(AssemblyCompanyAttribute))
+            .Select(ad => (String)(ad.ConstructorArguments[0].Value))
             .FirstOrDefault();
-         if (companyAttr != null)
-            company = companyAttr.Company;
          // retrieve the assembly description attribute
-         var desc = (String)null;
-         var descAttr = (AssemblyDescriptionAttribute)asm
-            .GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false)
+         var desc = CustomAttributeData.GetCustomAttributes(asm)
+            .Where(ad => ad.Constructor.DeclaringType == typeof(AssemblyDescriptionAttribute))
+            .Select(ad => (String)(ad.ConstructorArguments[0].Value))
             .FirstOrDefault();
-         if (descAttr != null)
-            desc = descAttr.Description;
+         // retrieve the assembly copyright attribute
+         var copy = CustomAttributeData.GetCustomAttributes(asm)
+            .Where(ad => ad.Constructor.DeclaringType == typeof(AssemblyCopyrightAttribute))
+            .Select(ad => (String)(ad.ConstructorArguments[0].Value))
+            .FirstOrDefault();
+         // retrieve the assembly target framework attribute
+         var target = CustomAttributeData.GetCustomAttributes(asm)
+            .Where(ad => ad.Constructor.DeclaringType == typeof(TargetFrameworkAttribute))
+            .Select(ad => (String)(ad.ConstructorArguments[0].Value))
+            .FirstOrDefault();
          // return the assembly properties
          return new Properties()
          {
             Name = asm.GetName().Name,
             Version = ver,
             Description = desc,
-            Company = company
+            Copyright = copy,
+            Company = company,
+            TargetFrameworkName = target
          };
       }
 
@@ -133,6 +143,8 @@ namespace NuBuild.MSBuild
          public Version Version { get; set; }
          public String Company { get; set; }
          public String Description { get; set; }
+         public String Copyright { get; set; }
+         public String TargetFrameworkName { get; set; }
       }
    }
 }
