@@ -24,11 +24,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 // Project References
+using NuGet;
 
 namespace NuBuild.MSBuild
 {
@@ -42,7 +44,6 @@ namespace NuBuild.MSBuild
    public sealed class NuPackage : Task, NuGet.IPropertyProvider
    {
       private Project propertyProject = null;
-      private AppDomain asmDomain;
 
       #region Task Parameters
       /// <summary>
@@ -66,6 +67,11 @@ namespace NuBuild.MSBuild
       /// </summary>
       public ITaskItem[] ReferenceLibraries { get; set; }
       /// <summary>
+      /// Specifies whether to add binaries (.dll and .exe files) from referenced projects into subfolders
+      /// (eg. lib\net40) based on TargetFrameworkVersion 
+      /// </summary>
+      public Boolean AddBinariesToSubfolder { get; set; }
+      /// <summary>
       /// Specifies whether to add PDB files for binaries
       /// automatically to the package
       /// </summary>
@@ -87,7 +93,6 @@ namespace NuBuild.MSBuild
             if (this.ReferenceLibraries == null)
                this.ReferenceLibraries = new ITaskItem[0];
             this.OutputPath = Path.GetFullPath(this.OutputPath);
-            this.asmDomain = AppDomain.CreateDomain("NuBuild.MSBuild.NuPackage.Domain");
             // compile the nuget package
             foreach (var specItem in this.NuSpec)
                BuildPackage(specItem);
@@ -96,11 +101,6 @@ namespace NuBuild.MSBuild
          {
             Log.LogError("{0} ({1})", e.Message, e.GetType().Name);
             return false;
-         }
-         finally
-         {
-            if (this.asmDomain != null)
-               AppDomain.Unload(this.asmDomain);
          }
          return true;
       }
@@ -144,7 +144,8 @@ namespace NuBuild.MSBuild
          // . DLL references go in the lib package folder
          // . EXE references go in the tools package folder
          // . everything else goes in the content package folder
-         // . folders may be overridden using NuBuildTargetFolder (lib\net40, etc.)
+         // . folders may be overridden using NuBuildTargetFolder metadata (lib\net40, etc.)
+         // . folders may be overridden using TargetFramework attribute (lib\net40, etc.)
          foreach (var libItem in this.ReferenceLibraries)
          {
             var srcPath = libItem.GetMetadata("FullPath");
@@ -161,10 +162,18 @@ namespace NuBuild.MSBuild
                tgtFolder = "tools";
                hasPdb = true;
             }
-            // apply the custom folder override on the reference
+            // apply the custom folder override on the reference, or based on TargetFramework
             var customFolder = libItem.GetMetadata("NuBuildTargetFolder");
             if (!String.IsNullOrWhiteSpace(customFolder))
                tgtFolder = customFolder;
+            else if (AddBinariesToSubfolder)
+               try
+               {
+                  var targetFrameworkName = AssemblyReader.Read(srcPath).TargetFrameworkName;
+                  if (!String.IsNullOrWhiteSpace(targetFrameworkName))
+                     tgtFolder = Path.Combine(tgtFolder, VersionUtility.GetShortFrameworkName(new FrameworkName(targetFrameworkName)));
+               }
+               catch { }
             // add the source library file to the package
             builder.Files.Add(
                new NuGet.PhysicalPackageFile()
@@ -180,7 +189,7 @@ namespace NuBuild.MSBuild
             // add PDBs if specified and exist
             if (hasPdb && this.IncludePdbs)
             {
-               var pdbPath = srcPath.Substring(0, srcPath.LastIndexOf('.')) + ".pdb";
+               var pdbPath = Path.ChangeExtension(srcPath, ".pdb");
                if (File.Exists(pdbPath))
                   builder.Files.Add(
                      new NuGet.PhysicalPackageFile()
@@ -237,7 +246,7 @@ namespace NuBuild.MSBuild
             if (this.propertyProject == null)
             {
                var prop = BuildManager.DefaultBuildManager.GetType().GetProperty(
-                  "Microsoft.Build.BackEnd.IBuildComponentHost.BuildParameters",
+                  "Microsoft.Build.BackEnd.IBuildComponentHost.BuildParameters", 
                   BindingFlags.Instance | BindingFlags.NonPublic
                );
                if (prop == null)
@@ -246,8 +255,8 @@ namespace NuBuild.MSBuild
                   .GetValue(BuildManager.DefaultBuildManager, null);
                this.propertyProject = ProjectCollection.GlobalProjectCollection
                   .LoadProject(
-                     this.ProjectPath,
-                     param.GlobalProperties,
+                     this.ProjectPath, 
+                     param.GlobalProperties, 
                      ProjectCollection.GlobalProjectCollection.DefaultToolsVersion
                   );
             }
@@ -286,6 +295,8 @@ namespace NuBuild.MSBuild
                   return props.Version.ToString();
                if (property == "description")
                   return props.Description;
+               if (property == "copyright")
+                  return props.Copyright;
                if (property == "author")
                   return props.Company;
             }

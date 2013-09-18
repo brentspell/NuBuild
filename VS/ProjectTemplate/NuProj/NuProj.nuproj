@@ -6,6 +6,7 @@
       <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
       <NuBuildVersionSource>library</NuBuildVersionSource>
       <NuBuildVersionFileName>true</NuBuildVersionFileName>
+      <NuBuildAddBinariesToSubfolder>false</NuBuildAddBinariesToSubfolder>
       <NuBuildIncludePdbs>false</NuBuildIncludePdbs>
    </PropertyGroup>
    <PropertyGroup Condition="'$(Configuration)' == 'Debug'"></PropertyGroup>

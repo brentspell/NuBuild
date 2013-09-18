@@ -55,6 +55,7 @@ namespace NuBuild.VS
       private String outputPath;
       private VersionSource versionSource;
       private Boolean versionFileName;
+      private Boolean addBinariesToSubfolder;
       private Boolean includePdbs;
       private TargetFramework targetFramework;
 
@@ -116,9 +117,21 @@ namespace NuBuild.VS
       }
 
       /// <summary>
+      /// Specifies whether to add referenced assemblies into subfolders based on the assembly's TargetFramework.
+      /// </summary>
+      [Category("Advanced")]
+      [DisplayName("Add Binaries To Subfolder")]
+      [Description(@"Specifies whether to add referenced assemblies into subfolders based on the assembly's TargetFramework.")]
+      public Boolean AddBinariesToSubfolder
+      {
+         get { return this.addBinariesToSubfolder; }
+         set { this.addBinariesToSubfolder = value; this.IsDirty = true; }
+      }
+
+      /// <summary>
       /// Specifies whether to include PDBs for referenced assemblies
       /// </summary>
-      [Category("Package Generation")]
+      [Category("Advanced")]
       [DisplayName("Include PDBs")]
       [Description("Specifies whether to include PDBs for referenced assemblies.")]
       public Boolean IncludePdbs
@@ -148,6 +161,9 @@ namespace NuBuild.VS
          );
          this.versionFileName = Boolean.Parse(
             this.ProjectMgr.GetProjectProperty("NuBuildVersionFileName")
+         );
+         this.addBinariesToSubfolder = Boolean.Parse(
+            this.ProjectMgr.GetProjectProperty("NuBuildAddBinariesToSubfolder")
          );
          this.includePdbs = Boolean.Parse(
             this.ProjectMgr.GetProjectProperty("NuBuildIncludePdbs")
@@ -186,6 +202,10 @@ namespace NuBuild.VS
          this.ProjectMgr.SetProjectProperty(
             "NuBuildVersionFileName",
             this.versionFileName.ToString()
+         );
+         this.ProjectMgr.SetProjectProperty(
+            "NuBuildAddBinariesToSubfolder",
+            this.addBinariesToSubfolder.ToString()
          );
          this.ProjectMgr.SetProjectProperty(
             "NuBuildIncludePdbs",
