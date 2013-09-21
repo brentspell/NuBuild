@@ -35,6 +35,9 @@
          (eg. lib\net40) based on TargetFrameworkVersion
       -->
       <NuBuildAddBinariesToSubfolder Condition="'$(NuBuildAddBinariesToSubfolder)' == ''">false</NuBuildAddBinariesToSubfolder>
+      <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
+      <TargetFrameworkMoniker Condition="'$(TargetFrameworkMoniker)' == '' and '$(TargetFrameworkProfile)' != ''">$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion),Profile=$(TargetFrameworkProfile)</TargetFrameworkMoniker>
+      <TargetFrameworkMoniker Condition="'$(TargetFrameworkMoniker)' == ''">$(TargetFrameworkIdentifier),Version=$(TargetFrameworkVersion)</TargetFrameworkMoniker>
    </PropertyGroup>
    <!-- Target: GetCopyToOutputDirectoryItems 
       . determines additional files to output directory
