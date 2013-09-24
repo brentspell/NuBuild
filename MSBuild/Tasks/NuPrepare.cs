@@ -202,13 +202,13 @@ namespace NuBuild.MSBuild
             .Elements()
             .Single(e => e.Name.LocalName == "id")
             .Value;
-         if (id == "$id$")
+         if (id.IndexOf("$id$") != -1)
          {
             foreach (var libItem in this.ReferenceLibraries)
             {
                try
                {
-                  id = AssemblyReader.Read(libItem.GetMetadata("FullPath")).Name;
+                  id = id.Replace("$id$", AssemblyReader.Read(libItem.GetMetadata("FullPath")).Name);
                   break;
                }
                catch { }
