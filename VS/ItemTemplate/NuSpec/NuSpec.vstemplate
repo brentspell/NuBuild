@@ -4,7 +4,8 @@
       <Name>NuGet Package Specification</Name>
       <Description>NuGet package specification</Description>
       <Icon>NuSpec.ico</Icon>
-      <ProjectType>NuGet</ProjectType>
+      <ProjectType>CSharp</ProjectType>
+      <!--<ProjectSubType></ProjectSubType>-->
       <DefaultName>Package.nuspec</DefaultName>
       <ProvideDefaultName>true</ProvideDefaultName>
    </TemplateData>

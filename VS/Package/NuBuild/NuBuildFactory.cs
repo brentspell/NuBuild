@@ -23,8 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Microsoft.VisualStudio.Project;
-using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+using Microsoft.VisualStudio.Shell.Flavor;
 // Project References
 
 namespace NuBuild.VS
@@ -38,7 +37,7 @@ namespace NuBuild.VS
    /// Visual Studio.
    /// </remarks>
    [Guid(NuBuildFactory.FactoryGuidString)]
-   public sealed class NuBuildFactory : ProjectFactory
+   public sealed class NuBuildFactory : FlavoredProjectFactoryBase
    {
       public const String FactoryGuidString = "e09dd79a-4488-4ab9-8d3f-a7eee78bf432";
       public static readonly Guid FactoryGuid = new Guid(FactoryGuidString);
@@ -50,24 +49,26 @@ namespace NuBuild.VS
       /// <param name="package">
       /// The current NuBuild VS package
       /// </param>
-      public NuBuildFactory (NuBuildPackage package) : base(package)
+      public NuBuildFactory (NuBuildPackage package) : base()
       {
          this.package = package;
       }
+
       /// <summary>
-      /// Creates a new project instance
+      /// Create an instance of NuBuildNode. 
+      /// The initialization will be done later when Visual Studio calls
+      /// InitalizeForOuter on it.
       /// </summary>
+      /// <param name="outerProjectIUnknown">
+      /// This value points to the outer project. It is useful if there is a 
+      /// Project SubType of this Project SubType.
+      /// </param>
       /// <returns>
-      /// The NuBuildNode project node
+      /// An NuBuildNode instance that has not been initialized.
       /// </returns>
-      protected override ProjectNode CreateProject ()
+      protected override object PreCreateForOuter(IntPtr outerProjectIUnknown)
       {
          var project = new NuBuildNode(this.package);
-         var provider = (IServiceProvider)this.package;
-         var olesite = (IOleServiceProvider)provider.GetService(
-            typeof(IOleServiceProvider)
-         );
-         project.SetSite(olesite);
          return project;
       }
    }

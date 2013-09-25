@@ -9,7 +9,7 @@
       Manufacturer="Brent M. Spell"
       Language="1033">
       <Package
-         Description="A NuGet project system for Visual Studio" 
+         Description="A NuGet packaging project system for Visual Studio" 
          Keywords="nuget nuproj build system visual studio"
          Compressed="yes"
          InstallPrivileges="elevated"/>

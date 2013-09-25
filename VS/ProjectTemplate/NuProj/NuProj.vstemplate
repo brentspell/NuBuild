@@ -1,15 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
    <TemplateData>
-      <Name>NuGet Package</Name>
-      <Description>NuGet package project</Description>
+      <Name>NuBuild Packager</Name>
+      <Description>Creates NuGet packages based on the nuspec files</Description>
       <Icon>NuProj.ico</Icon>
-      <ProjectType>NuGet</ProjectType>
+      <ProjectType>CSharp</ProjectType>
+      <!--<ProjectSubType></ProjectSubType>-->
       <DefaultName>Package</DefaultName>
       <ProvideDefaultName>true</ProvideDefaultName>
    </TemplateData>
    <TemplateContent>
-      <Project File="NuProj.nuproj" ReplaceParameters="true">
+      <Project File="NuProj.csproj" ReplaceParameters="true">
          <ProjectItem ReplaceParameters="true" TargetFileName="$projectname$.nuspec">NuProj.nuspec</ProjectItem>
       </Project>
    </TemplateContent>

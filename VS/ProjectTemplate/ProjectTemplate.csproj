@@ -44,9 +44,7 @@
     <ZipProject Include="NuProj\NuProj.vstemplate">
       <SubType>Designer</SubType>
     </ZipProject>
-    <ZipProject Include="NuProj\NuProj.nuproj">
-      <SubType>Designer</SubType>
-    </ZipProject>
+    <ZipProject Include="NuProj\NuProj.csproj" />
     <ZipProject Include="NuProj\NuProj.ico" />
     <ZipProject Include="NuProj\NuProj.nuspec" />
   </ItemGroup>
@@ -54,5 +52,5 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.targets"/>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.targets" />
 </Project>
