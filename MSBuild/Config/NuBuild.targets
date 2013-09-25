@@ -71,7 +71,7 @@
                  OutputPath="$(OutputPath)"
                  BuildNumber="$(BuildNumber)"
                  ReferenceLibraries="@(__ReferenceLibraries)">
-         <Output TaskParameter="NuSpec" ItemName="NuPrepared"/>
+         <Output TaskParameter="Prepared" ItemName="NuPrepared"/>
          <Output TaskParameter="Sources" ItemName="NuSources"/>
          <Output TaskParameter="Targets" ItemName="NuTargets"/>
       </NuPrepare>
