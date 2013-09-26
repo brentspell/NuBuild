@@ -58,6 +58,11 @@ namespace NuBuild.MSBuild
       [Output]
       public ITaskItem[] NuSpec { get; set; }
       /// <summary>
+      /// The EmbeddedResource file items
+      /// </summary>
+      [Required]
+      public ITaskItem[] Embedded { get; set; }
+      /// <summary>
       /// The name of the project being build
       /// </summary>
       [Required]
@@ -132,6 +137,8 @@ namespace NuBuild.MSBuild
             // configure each nuspec item
             foreach (var specItem in this.NuSpec)
                PreparePackage(specItem);
+            // add build dependencies from the embedded resource file(s)
+            this.sourceList.AddRange(this.Embedded);
             // return the list of build sources/targets
             this.Prepared = this.preparedList.ToArray();
             this.Sources = this.sourceList.ToArray();
@@ -197,7 +204,7 @@ namespace NuBuild.MSBuild
             if (specItem.GetMetadata("Extension") != ".nuspec")
             {
                Log.LogWarning(
-                  "The source item '{0}' is not a valid .nuspec file! Change Build Action from Compile to None. File skipped.\n{1} ({2})",
+                  "The source item '{0}' is not a valid .nuspec file! Change Build Action from Compile to None or Embedded Resource. File skipped.\n{1} ({2})",
                   specItem.GetMetadata("FullPath"), e.Message, e.GetType().Name);
                return;
             }

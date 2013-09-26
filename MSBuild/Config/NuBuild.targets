@@ -65,6 +65,7 @@
          <Output TaskParameter="TargetOutputs" ItemName="__ReferenceLibraries" />
       </MSBuild>
       <NuPrepare NuSpec="@(Compile)"
+                 Embedded="@(EmbeddedResource)"
                  ProjectName="$(MSBuildProjectName)"
                  VersionSource="$(NuBuildVersionSource)"
                  VersionFileName="$(NuBuildVersionFileName)"
@@ -100,6 +101,7 @@
            Outputs="@(NuTargets)">
       <NuPackage ProjectPath="$(MSBuildProjectFullPath)"
                  NuSpec="@(NuPrepared)"
+                 Embedded="@(EmbeddedResource)"
                  OutputPath="$(OutputPath)"
                  ReferenceLibraries="@(__ReferenceLibraries)"
                  AddBinariesToSubfolder="$(NuBuildAddBinariesToSubfolder)"

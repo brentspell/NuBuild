@@ -57,6 +57,11 @@ namespace NuBuild.MSBuild
       [Required]
       public ITaskItem[] NuSpec { get; set; }
       /// <summary>
+      /// The EmbeddedResource file items
+      /// </summary>
+      [Required]
+      public ITaskItem[] Embedded { get; set; }
+      /// <summary>
       /// The project output directory path
       /// </summary>
       [Required]
@@ -89,7 +94,7 @@ namespace NuBuild.MSBuild
       {
          try
          {
-            // parepare the task for execution
+            // prepare the task for execution
             if (this.ReferenceLibraries == null)
                this.ReferenceLibraries = new ITaskItem[0];
             this.OutputPath = Path.GetFullPath(this.OutputPath);
@@ -124,16 +129,19 @@ namespace NuBuild.MSBuild
          var version = specItem.GetMetadata("NuPackageVersion");
          if (!String.IsNullOrEmpty(version))
             builder.Version = new NuGet.SemanticVersion(version);
-         // add a new file to the folder for each project
+         // add a new file to the lib/tools/content folder for each project
          // referenced by the current project
          AddLibraries(builder);
+         // add a new file to the tools/content folder for each project
+         // specified as embedded resource by the current project
+         AddEmbedded(builder);
          // write the configured package out to disk
          var pkgPath = specItem.GetMetadata("NuPackagePath");
          using (var pkgFile = File.Create(pkgPath))
             builder.Save(pkgFile);
       }
       /// <summary>
-      /// Adds project references to the package lib section
+      /// Adds project references to the package lib/tools/content section
       /// </summary>
       /// <param name="builder">
       /// The current package builder
@@ -203,6 +211,38 @@ namespace NuBuild.MSBuild
                      }
                   );
             }
+         }
+      }
+      /// <summary>
+      /// Adds embedded resources to the package tools/content section
+      /// </summary>
+      /// <param name="builder">
+      /// The current package builder
+      /// </param>
+      private void AddEmbedded(NuGet.PackageBuilder builder)
+      {
+         // add package files from project embedded resources
+         foreach (var fileItem in this.Embedded)
+         {
+            // only link items has Link metadata, that is the path, where the link itself is located (not the referred item)
+            var tgtPath = fileItem.GetMetadata("Link");
+            // if it is not a link, handle as normal file
+            if (String.IsNullOrEmpty(tgtPath))
+               tgtPath = fileItem.GetMetadata("Identity");
+            if (tgtPath.IndexOf('\\') == -1)
+               // warning if file is not in a subfolder
+               Log.LogWarning(
+                  "The source item '{0}' is not a valid content! Files has to be in a subfolder, like content or tools! File skipped.",
+                  tgtPath);
+            else
+               // add the source file to the package
+               builder.Files.Add(
+                  new NuGet.PhysicalPackageFile()
+                  {
+                     SourcePath = fileItem.GetMetadata("FullPath"),
+                     TargetPath = tgtPath,
+                  }
+               );
          }
       }
       /// <summary>
