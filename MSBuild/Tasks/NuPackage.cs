@@ -45,6 +45,15 @@ namespace NuBuild.MSBuild
    {
       private Project propertyProject = null;
 
+      private Dictionary<string, Func<AssemblyReader.Properties, string>> assemblyProperties = new Dictionary<string, Func<AssemblyReader.Properties, string>>()
+      {
+         { "id", p => p.Name },
+         { "version", p => p.Version == null ? null : p.Version.ToString() },
+         { "description", p => p.Description },
+         { "copyright", p => p.Copyright },
+         { "author", p => p.Company },
+      };
+
       #region Task Parameters
       /// <summary>
       /// The full project path
@@ -263,43 +272,13 @@ namespace NuBuild.MSBuild
          {
             // attempt to retrieve the project from the global collection
             // this should always work in Visual Studio
+            // if there is no project in the global collection, create a new one
             this.propertyProject = ProjectCollection
                .GlobalProjectCollection
                .LoadedProjects
                .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.FullPath, this.ProjectPath) == 0)
-               .FirstOrDefault();
-            //---------------------------------------------------------------
-            // HACK: bspell - 6/25/2013
-            // . unfortunately, MSBuild does not maintain the current project
-            //   in the global project collection, nor does it expose the
-            //   global properties collection for generic property retrieval
-            // . retrieve the build parameters here using reflection to
-            //   get the global MSBuild properties collection and load the
-            //   project manually
-            // . accessing private members using reflection is awful, but the
-            //   alternative would be to pass in all possible MSBuild 
-            //   properties to the custom task, which wouldn't even work for
-            //   application-specific properties
-            // . this method may be incompatible with future versions of 
-            //   MSBuild
-            //---------------------------------------------------------------
-            if (this.propertyProject == null)
-            {
-               var prop = BuildManager.DefaultBuildManager.GetType().GetProperty(
-                  "Microsoft.Build.BackEnd.IBuildComponentHost.BuildParameters", 
-                  BindingFlags.Instance | BindingFlags.NonPublic
-               );
-               if (prop == null)
-                  throw new NotSupportedException("Unable to retrieve MSBuild parameters using reflection");
-               var param = (BuildParameters)prop
-                  .GetValue(BuildManager.DefaultBuildManager, null);
-               this.propertyProject = ProjectCollection.GlobalProjectCollection
-                  .LoadProject(
-                     this.ProjectPath, 
-                     param.GlobalProperties, 
-                     ProjectCollection.GlobalProjectCollection.DefaultToolsVersion
-                  );
-            }
+               .FirstOrDefault()
+               ?? new Project(this.ProjectPath);
          }
          if (this.propertyProject != null)
             return this.propertyProject.AllEvaluatedProperties
@@ -324,24 +303,16 @@ namespace NuBuild.MSBuild
       public dynamic GetPropertyValue (String property)
       {
          // attempt to resolve the property from the referenced libraries
-         foreach (var libItem in this.ReferenceLibraries)
-         {
-            try
-            {
-               var props = AssemblyReader.Read(libItem.GetMetadata("FullPath"));
-               if (property == "id")
-                  return props.Name;
-               if (property == "version" && props.Version != null)
-                  return props.Version.ToString();
-               if (property == "description")
-                  return props.Description;
-               if (property == "copyright")
-                  return props.Copyright;
-               if (property == "author")
-                  return props.Company;
-            }
-            catch { }
-         }
+         var propGet = (Func<AssemblyReader.Properties, string>)null;
+         if (assemblyProperties.TryGetValue(property, out propGet))
+            foreach (var libItem in this.ReferenceLibraries)
+               try
+               {
+                  var prop = propGet(AssemblyReader.Read(libItem.GetMetadata("FullPath")));
+                  if (!String.IsNullOrWhiteSpace(prop))
+                     return prop;
+               }
+               catch { }
          // if the property was not yet resolved, retrieve it
          // from the project properties
          return GetProjectProperty(property);
