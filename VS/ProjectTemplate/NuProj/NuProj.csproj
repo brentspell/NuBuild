@@ -7,6 +7,7 @@
       <NuBuildVersionSource>library</NuBuildVersionSource>
       <NuBuildVersionFileName>true</NuBuildVersionFileName>
       <NuBuildAddBinariesToSubfolder>false</NuBuildAddBinariesToSubfolder>
+      <UseVSHostingProcess>false</UseVSHostingProcess>
    </PropertyGroup>
    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
       <OutputPath>Bin\</OutputPath>
