@@ -45,12 +45,18 @@ namespace NuBuild.MSBuild
    /// </remarks>
    public sealed class NuPrepare : Task
    {
+      private PropertyProvider propertyProvider;
       private List<ITaskItem> preparedList = new List<ITaskItem>();
       private List<ITaskItem> sourceList = new List<ITaskItem>();
       private List<ITaskItem> targetList = new List<ITaskItem>();
       private VersionSource versionSource;
 
       #region Task Parameters
+      /// <summary>
+      /// The full project path
+      /// </summary>
+      [Required]
+      public String ProjectPath { get; set; }
       /// <summary>
       /// The source .nuspec file items
       /// </summary>
@@ -124,6 +130,7 @@ namespace NuBuild.MSBuild
             if (this.ReferenceLibraries == null)
                this.ReferenceLibraries = new ITaskItem[0];
             this.OutputPath = Path.GetFullPath(this.OutputPath);
+            propertyProvider = new PropertyProvider(ProjectPath, ReferenceLibraries);
             Directory.CreateDirectory(this.OutputPath);
             // add build dependencies from the nuspec file(s)
             // and the list of project references
@@ -232,18 +239,7 @@ namespace NuBuild.MSBuild
             .Elements()
             .Single(e => e.Name.LocalName == "id")
             .Value;
-         if (id.IndexOf("$id$") != -1)
-         {
-            foreach (var libItem in this.ReferenceLibraries)
-            {
-               try
-               {
-                  id = id.Replace("$id$", AssemblyReader.Read(libItem.GetMetadata("FullPath")).Name);
-                  break;
-               }
-               catch { }
-            }
-         }
+         id = propertyProvider.Process(id);
          return id;
       }
       /// <summary>

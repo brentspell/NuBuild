@@ -25,8 +25,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 // Project References
@@ -43,16 +41,8 @@ namespace NuBuild.MSBuild
    /// </remarks>
    public sealed class NuPackage : Task, NuGet.IPropertyProvider
    {
-      private Project propertyProject = null;
-
-      private Dictionary<string, Func<AssemblyReader.Properties, string>> assemblyProperties = new Dictionary<string, Func<AssemblyReader.Properties, string>>()
-      {
-         { "id", p => p.Name },
-         { "version", p => p.Version == null ? null : p.Version.ToString() },
-         { "description", p => p.Description },
-         { "copyright", p => p.Copyright },
-         { "author", p => p.Company },
-      };
+      private string version;
+      private PropertyProvider propertyProvider;
 
       #region Task Parameters
       /// <summary>
@@ -107,6 +97,7 @@ namespace NuBuild.MSBuild
             if (this.ReferenceLibraries == null)
                this.ReferenceLibraries = new ITaskItem[0];
             this.OutputPath = Path.GetFullPath(this.OutputPath);
+            propertyProvider = new PropertyProvider(ProjectPath, ReferenceLibraries);
             // compile the nuget package
             foreach (var specItem in this.NuSpec)
                BuildPackage(specItem);
@@ -135,7 +126,7 @@ namespace NuBuild.MSBuild
             true
          );
          // initialize dynamic manifest properties
-         var version = specItem.GetMetadata("NuPackageVersion");
+         version = specItem.GetMetadata("NuPackageVersion");
          if (!String.IsNullOrEmpty(version))
             builder.Version = new NuGet.SemanticVersion(version);
          // add a new file to the lib/tools/content folder for each project
@@ -254,39 +245,6 @@ namespace NuBuild.MSBuild
                );
          }
       }
-      /// <summary>
-      /// Retrieves a property from the current NuGet project file
-      /// </summary>
-      /// <param name="name">
-      /// The name of the property to retrieve
-      /// </param>
-      /// <returns>
-      /// The specified property value if found
-      /// Null otherwise
-      /// </returns>
-      private String GetProjectProperty (String name)
-      {
-         // attempt to resolve the requested property
-         // from the project properties
-         if (this.propertyProject == null)
-         {
-            // attempt to retrieve the project from the global collection
-            // this should always work in Visual Studio
-            // if there is no project in the global collection, create a new one
-            this.propertyProject = ProjectCollection
-               .GlobalProjectCollection
-               .LoadedProjects
-               .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.FullPath, this.ProjectPath) == 0)
-               .FirstOrDefault()
-               ?? new Project(this.ProjectPath);
-         }
-         if (this.propertyProject != null)
-            return this.propertyProject.AllEvaluatedProperties
-               .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.Name, name) == 0)
-               .Select(p => p.EvaluatedValue)
-               .FirstOrDefault();
-         return null;
-      }
 
       #region IPropertyProvider Implementation
       /// <summary>
@@ -302,20 +260,10 @@ namespace NuBuild.MSBuild
       /// </returns>
       public dynamic GetPropertyValue (String property)
       {
-         // attempt to resolve the property from the referenced libraries
-         var propGet = (Func<AssemblyReader.Properties, string>)null;
-         if (assemblyProperties.TryGetValue(property, out propGet))
-            foreach (var libItem in this.ReferenceLibraries)
-               try
-               {
-                  var prop = propGet(AssemblyReader.Read(libItem.GetMetadata("FullPath")));
-                  if (!String.IsNullOrWhiteSpace(prop))
-                     return prop;
-               }
-               catch { }
-         // if the property was not yet resolved, retrieve it
-         // from the project properties
-         return GetProjectProperty(property);
+         if (property == "version" && !String.IsNullOrEmpty(version))
+            return version;
+         else
+            return propertyProvider.GetPropertyValue(property);
       }
       #endregion
    }

@@ -64,7 +64,8 @@
       <MSBuild Projects="@(ProjectReference)" UseResultsCache="true">
          <Output TaskParameter="TargetOutputs" ItemName="__ReferenceLibraries" />
       </MSBuild>
-      <NuPrepare NuSpec="@(Compile)"
+      <NuPrepare ProjectPath="$(MSBuildProjectFullPath)"
+                 NuSpec="@(Compile)"
                  Embedded="@(EmbeddedResource)"
                  ProjectName="$(MSBuildProjectName)"
                  VersionSource="$(NuBuildVersionSource)"
