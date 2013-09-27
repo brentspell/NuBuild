@@ -29,7 +29,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System.Xml.Linq;
 using NuGet;
-
 // Project References
 
 namespace NuBuild.MSBuild
@@ -45,7 +44,7 @@ namespace NuBuild.MSBuild
    /// </remarks>
    public sealed class NuPrepare : Task
    {
-      private PropertyProvider propertyProvider;
+      private IPropertyProvider propertyProvider;
       private List<ITaskItem> preparedList = new List<ITaskItem>();
       private List<ITaskItem> sourceList = new List<ITaskItem>();
       private List<ITaskItem> targetList = new List<ITaskItem>();

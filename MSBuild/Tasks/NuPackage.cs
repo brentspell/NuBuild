@@ -27,8 +27,8 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-// Project References
 using NuGet;
+// Project References
 
 namespace NuBuild.MSBuild
 {
@@ -42,7 +42,7 @@ namespace NuBuild.MSBuild
    public sealed class NuPackage : Task, NuGet.IPropertyProvider
    {
       private string version;
-      private PropertyProvider propertyProvider;
+      private IPropertyProvider propertyProvider;
 
       #region Task Parameters
       /// <summary>
@@ -235,14 +235,19 @@ namespace NuBuild.MSBuild
                   "The source item '{0}' is not a valid content! Files has to be in a subfolder, like content or tools! File skipped.",
                   tgtPath);
             else
+            {
+               // determine pre package processing necessity
+               var prePackProc = tgtPath.EndsWith(".ppp");
+               if (prePackProc)
+                  tgtPath = tgtPath.Substring(0, tgtPath.Length - 4);
                // add the source file to the package
-               builder.Files.Add(
-                  new NuGet.PhysicalPackageFile()
-                  {
-                     SourcePath = fileItem.GetMetadata("FullPath"),
-                     TargetPath = tgtPath,
-                  }
-               );
+               var file = new NuGet.PhysicalPackageFile()
+               {
+                  SourcePath = fileItem.GetMetadata("FullPath"),
+                  TargetPath = tgtPath,
+               };
+               builder.Files.Add(prePackProc ? new TokenProcessingWrapper(file, this) : (IPackageFile)file);
+            }
          }
       }
 

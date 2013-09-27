@@ -52,7 +52,9 @@
     <Compile Include="NuPrepare.cs" />
     <Compile Include="NuPackage.cs" />
     <Compile Include="Utility\AssemblyReader.cs" />
+    <Compile Include="Utility\IPropertyProviderExtensions.cs" />
     <Compile Include="Utility\PropertyProvider.cs" />
+    <Compile Include="Utility\TokenProcessingWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.csproj">

@@ -20,18 +20,19 @@
 //===========================================================================
 // System References
 using System;
+using System.IO;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using NuGet;
 // Project References
 
 namespace NuBuild.MSBuild
 {
-   public class PropertyProvider : NuGet.IPropertyProvider
+   public class PropertyProvider : IPropertyProvider
    {
       private static Dictionary<string, Func<AssemblyReader.Properties, string>> assemblyProperties = new Dictionary<string, Func<AssemblyReader.Properties, string>>()
       {
@@ -41,8 +42,6 @@ namespace NuBuild.MSBuild
          { "copyright", p => p.Copyright },
          { "author", p => p.Company },
       };
-      private static readonly Regex _tokenRegex = new Regex(@"\$(?<propertyName>\w+)\$");
-
       private string projectPath;
       private ITaskItem[] referenceLibraries;
 
@@ -52,32 +51,6 @@ namespace NuBuild.MSBuild
       {
          this.projectPath = projectPath;
          this.referenceLibraries = referenceLibraries;
-      }
-
-      /// <summary>
-      /// Replaces tokens in paramtere text
-      /// </summary>
-      /// <param name="text">
-      /// Text with tokens to replace
-      /// </param>
-      /// <param name="throwIfNotFound">
-      /// Whether to throw if token not found
-      /// </param>
-      /// <returns>
-      /// Text with replaced tokens
-      /// </returns>
-      public string Process(string text, bool throwIfNotFound = true)
-      {
-         return _tokenRegex.Replace(text, match => ReplaceToken(match, throwIfNotFound));
-      }
-
-      private string ReplaceToken(Match match, bool throwIfNotFound)
-      {
-         string propertyName = match.Groups["propertyName"].Value;
-         var value = GetPropertyValue(propertyName);
-         if (value == null && throwIfNotFound)
-            throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, "The replacement token '{0}' has no value.", propertyName));
-         return value;
       }
 
       /// <summary>
