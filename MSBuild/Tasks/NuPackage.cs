@@ -240,13 +240,12 @@ namespace NuBuild.MSBuild
                var prePackProc = tgtPath.EndsWith(".ppp");
                if (prePackProc)
                   tgtPath = tgtPath.Substring(0, tgtPath.Length - 4);
+               // create the source file
+               var file = prePackProc ? new TokenProcessingPhysicalPackageFile(this) : new PhysicalPackageFile();
+               file.SourcePath = fileItem.GetMetadata("FullPath");
+               file.TargetPath = tgtPath;
                // add the source file to the package
-               var file = new NuGet.PhysicalPackageFile()
-               {
-                  SourcePath = fileItem.GetMetadata("FullPath"),
-                  TargetPath = tgtPath,
-               };
-               builder.Files.Add(prePackProc ? new TokenProcessingWrapper(file, this) : (IPackageFile)file);
+               builder.Files.Add(file);
             }
          }
       }

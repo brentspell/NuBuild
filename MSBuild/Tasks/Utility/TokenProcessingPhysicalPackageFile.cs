@@ -20,85 +20,35 @@
 //===========================================================================
 // System References
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Runtime.Versioning;
 using NuGet;
 // Project References
 
 namespace NuBuild.MSBuild
 {
-   public class TokenProcessingWrapper : IPackageFile
+   public class TokenProcessingPhysicalPackageFile : PhysicalPackageFile, IPackageFile
    {
-      private PhysicalPackageFile file;
       private IPropertyProvider propertyProvider;
 
-      public TokenProcessingWrapper(PhysicalPackageFile file, IPropertyProvider propertyProvider)
+      public TokenProcessingPhysicalPackageFile(IPropertyProvider propertyProvider)
       {
-         this.file = file;
          this.propertyProvider = propertyProvider;
-         //SourcePath = file.SourcePath;
-         //TargetPath = file.TargetPath;
-      }
-
-      /// <summary>
-      /// Path on disk
-      /// </summary>
-      public string SourcePath
-      {
-         get { return file.SourcePath; }
-         set { file.SourcePath = value; }
-      }
-
-      /// <summary>
-      /// Path in package
-      /// </summary>
-      public string TargetPath
-      {
-         get { return file.TargetPath; }
-         set { file.TargetPath = value; }
       }
 
       #region IPackageFile Implementation
 
-      public string Path
+      public new Stream GetStream()
       {
-         get { return TargetPath; }
-      }
-
-      public string EffectivePath
-      {
-         get;
-         private set;
-      }
-
-      public FrameworkName TargetFramework
-      {
-         get { return file.TargetFramework; }
-      }
-
-      public IEnumerable<FrameworkName> SupportedFrameworks
-      {
-         get { return file.SupportedFrameworks; }
-      }
-
-      public Stream GetStream()
-      {
-         return propertyProvider.Process(file.GetStream());
+         return propertyProvider.Process(base.GetStream());
       }
 
       #endregion
 
-      public override string ToString()
-      {
-         return TargetPath;
-      }
-
       public override bool Equals(object obj)
       {
-         var file = obj as TokenProcessingWrapper;
+         var file = obj as TokenProcessingPhysicalPackageFile;
 
          return file != null && String.Equals(SourcePath, file.SourcePath, StringComparison.OrdinalIgnoreCase) &&
                                 String.Equals(TargetPath, file.TargetPath, StringComparison.OrdinalIgnoreCase);
@@ -106,7 +56,7 @@ namespace NuBuild.MSBuild
 
       public override int GetHashCode()
       {
-         return file.GetHashCode();
+         return base.GetHashCode();
       }
    }
 }
