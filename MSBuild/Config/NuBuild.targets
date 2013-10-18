@@ -32,7 +32,7 @@
       <NuBuildIncludePdbs Condition="'$(NuBuildIncludePdbs)' == ''">false</NuBuildIncludePdbs>
       <!-- Properties: NuBuildAddBinariesToSubfolder
          . specifies whether to add binaries (.dll and .exe files) from referenced projects into subfolders
-         (eg. lib\net40) based on TargetFrameworkVersion
+           (eg. lib\net40) based on TargetFrameworkVersion
       -->
       <NuBuildAddBinariesToSubfolder Condition="'$(NuBuildAddBinariesToSubfolder)' == ''">false</NuBuildAddBinariesToSubfolder>
       <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
@@ -81,7 +81,7 @@
          <NuSources Include="$(MSBuildProjectFile);"/>
       </ItemGroup>
       <ItemGroup>
-         <NuTargets Include="@(CopyToOutputDirectoryItems);"/>
+         <NuTargets Include="@(CopyToOutputDirectoryItems->'$(OutputPath)%(TargetPath)');"/>
       </ItemGroup>
       <Message Text="NuSources: @(NuSources)"/>
       <Message Text="NuTargets: @(NuTargets)"/>
