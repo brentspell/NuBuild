@@ -25,12 +25,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-// Project References
 using NuGet;
+// Project References
 
 namespace NuBuild.MSBuild
 {
@@ -43,7 +41,8 @@ namespace NuBuild.MSBuild
    /// </remarks>
    public sealed class NuPackage : Task, NuGet.IPropertyProvider
    {
-      private Project propertyProject = null;
+      private string version;
+      private IPropertyProvider propertyProvider;
 
       #region Task Parameters
       /// <summary>
@@ -56,6 +55,11 @@ namespace NuBuild.MSBuild
       /// </summary>
       [Required]
       public ITaskItem[] NuSpec { get; set; }
+      /// <summary>
+      /// The EmbeddedResource file items
+      /// </summary>
+      [Required]
+      public ITaskItem[] Embedded { get; set; }
       /// <summary>
       /// The project output directory path
       /// </summary>
@@ -89,10 +93,16 @@ namespace NuBuild.MSBuild
       {
          try
          {
-            // parepare the task for execution
+            // prepare the task for execution
             if (this.ReferenceLibraries == null)
                this.ReferenceLibraries = new ITaskItem[0];
             this.OutputPath = Path.GetFullPath(this.OutputPath);
+            propertyProvider = new PropertyProvider(ProjectPath, ReferenceLibraries
+                .Where(libItem => 
+                {
+                    var copyLocal = libItem.GetMetadata("Private");
+                    return String.IsNullOrEmpty(copyLocal) || String.Compare(copyLocal, "false", true) != 0;
+                }).ToArray());
             // compile the nuget package
             foreach (var specItem in this.NuSpec)
                BuildPackage(specItem);
@@ -121,19 +131,22 @@ namespace NuBuild.MSBuild
             true
          );
          // initialize dynamic manifest properties
-         var version = specItem.GetMetadata("NuPackageVersion");
+         version = specItem.GetMetadata("NuPackageVersion");
          if (!String.IsNullOrEmpty(version))
             builder.Version = new NuGet.SemanticVersion(version);
-         // add a new file to the folder for each project
+         // add a new file to the lib/tools/content folder for each project
          // referenced by the current project
          AddLibraries(builder);
+         // add a new file to the tools/content folder for each project
+         // specified as embedded resource by the current project
+         AddEmbedded(builder);
          // write the configured package out to disk
          var pkgPath = specItem.GetMetadata("NuPackagePath");
          using (var pkgFile = File.Create(pkgPath))
             builder.Save(pkgFile);
       }
       /// <summary>
-      /// Adds project references to the package lib section
+      /// Adds project references to the package lib/tools/content section
       /// </summary>
       /// <param name="builder">
       /// The current package builder
@@ -206,67 +219,40 @@ namespace NuBuild.MSBuild
          }
       }
       /// <summary>
-      /// Retrieves a property from the current NuGet project file
+      /// Adds embedded resources to the package tools/content section
       /// </summary>
-      /// <param name="name">
-      /// The name of the property to retrieve
+      /// <param name="builder">
+      /// The current package builder
       /// </param>
-      /// <returns>
-      /// The specified property value if found
-      /// Null otherwise
-      /// </returns>
-      private String GetProjectProperty (String name)
+      private void AddEmbedded(NuGet.PackageBuilder builder)
       {
-         // attempt to resolve the requested property
-         // from the project properties
-         if (this.propertyProject == null)
+         // add package files from project embedded resources
+         foreach (var fileItem in this.Embedded)
          {
-            // attempt to retrieve the project from the global collection
-            // this should always work in Visual Studio
-            this.propertyProject = ProjectCollection
-               .GlobalProjectCollection
-               .LoadedProjects
-               .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.FullPath, this.ProjectPath) == 0)
-               .FirstOrDefault();
-            //---------------------------------------------------------------
-            // HACK: bspell - 6/25/2013
-            // . unfortunately, MSBuild does not maintain the current project
-            //   in the global project collection, nor does it expose the
-            //   global properties collection for generic property retrieval
-            // . retrieve the build parameters here using reflection to
-            //   get the global MSBuild properties collection and load the
-            //   project manually
-            // . accessing private members using reflection is awful, but the
-            //   alternative would be to pass in all possible MSBuild 
-            //   properties to the custom task, which wouldn't even work for
-            //   application-specific properties
-            // . this method may be incompatible with future versions of 
-            //   MSBuild
-            //---------------------------------------------------------------
-            if (this.propertyProject == null)
+            // only link items has Link metadata, that is the path, where the link itself is located (not the referred item)
+            var tgtPath = fileItem.GetMetadata("Link");
+            // if it is not a link, handle as normal file
+            if (String.IsNullOrEmpty(tgtPath))
+               tgtPath = fileItem.GetMetadata("Identity");
+            if (tgtPath.IndexOf('\\') == -1)
+               // warning if file is not in a subfolder
+               Log.LogWarning(
+                  "The source item '{0}' is not a valid content! Files has to be in a subfolder, like content or tools! File skipped.",
+                  tgtPath);
+            else
             {
-               var prop = BuildManager.DefaultBuildManager.GetType().GetProperty(
-                  "Microsoft.Build.BackEnd.IBuildComponentHost.BuildParameters", 
-                  BindingFlags.Instance | BindingFlags.NonPublic
-               );
-               if (prop == null)
-                  throw new NotSupportedException("Unable to retrieve MSBuild parameters using reflection");
-               var param = (BuildParameters)prop
-                  .GetValue(BuildManager.DefaultBuildManager, null);
-               this.propertyProject = ProjectCollection.GlobalProjectCollection
-                  .LoadProject(
-                     this.ProjectPath, 
-                     param.GlobalProperties, 
-                     ProjectCollection.GlobalProjectCollection.DefaultToolsVersion
-                  );
+               // determine pre package processing necessity
+               var prePackProc = tgtPath.EndsWith(".ppp");
+               if (prePackProc)
+                  tgtPath = tgtPath.Substring(0, tgtPath.Length - 4);
+               // create the source file
+               var file = prePackProc ? new TokenProcessingPhysicalPackageFile(this) : new PhysicalPackageFile();
+               file.SourcePath = fileItem.GetMetadata("FullPath");
+               file.TargetPath = tgtPath;
+               // add the source file to the package
+               builder.Files.Add(file);
             }
          }
-         if (this.propertyProject != null)
-            return this.propertyProject.AllEvaluatedProperties
-               .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.Name, name) == 0)
-               .Select(p => p.EvaluatedValue)
-               .FirstOrDefault();
-         return null;
       }
 
       #region IPropertyProvider Implementation
@@ -283,28 +269,10 @@ namespace NuBuild.MSBuild
       /// </returns>
       public dynamic GetPropertyValue (String property)
       {
-         // attempt to resolve the property from the referenced libraries
-         foreach (var libItem in this.ReferenceLibraries)
-         {
-            try
-            {
-               var props = AssemblyReader.Read(libItem.GetMetadata("FullPath"));
-               if (property == "id")
-                  return props.Name;
-               if (property == "version" && props.Version != null)
-                  return props.Version.ToString();
-               if (property == "description")
-                  return props.Description;
-               if (property == "copyright")
-                  return props.Copyright;
-               if (property == "author")
-                  return props.Company;
-            }
-            catch { }
-         }
-         // if the property was not yet resolved, retrieve it
-         // from the project properties
-         return GetProjectProperty(property);
+         if (property == "version" && !String.IsNullOrEmpty(version))
+            return version;
+         else
+            return propertyProvider.GetPropertyValue(property);
       }
       #endregion
    }

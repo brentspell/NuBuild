@@ -29,7 +29,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System.Xml.Linq;
 using NuGet;
-
 // Project References
 
 namespace NuBuild.MSBuild
@@ -45,17 +44,29 @@ namespace NuBuild.MSBuild
    /// </remarks>
    public sealed class NuPrepare : Task
    {
+      private IPropertyProvider propertyProvider;
+      private List<ITaskItem> preparedList = new List<ITaskItem>();
       private List<ITaskItem> sourceList = new List<ITaskItem>();
       private List<ITaskItem> targetList = new List<ITaskItem>();
       private VersionSource versionSource;
 
       #region Task Parameters
       /// <summary>
+      /// The full project path
+      /// </summary>
+      [Required]
+      public String ProjectPath { get; set; }
+      /// <summary>
       /// The source .nuspec file items
       /// </summary>
       [Required]
       [Output]
       public ITaskItem[] NuSpec { get; set; }
+      /// <summary>
+      /// The EmbeddedResource file items
+      /// </summary>
+      [Required]
+      public ITaskItem[] Embedded { get; set; }
       /// <summary>
       /// The name of the project being build
       /// </summary>
@@ -86,6 +97,11 @@ namespace NuBuild.MSBuild
       /// </summary>
       public ITaskItem[] ReferenceLibraries { get; set; }
       /// <summary>
+      /// Return the list of valid .nuspec file items for the project 
+      /// </summary>
+      [Output]
+      public ITaskItem[] Prepared { get; set; }
+      /// <summary>
       /// Return the list of source files (dependencies) for the project 
       /// via here
       /// </summary>
@@ -113,10 +129,15 @@ namespace NuBuild.MSBuild
             if (this.ReferenceLibraries == null)
                this.ReferenceLibraries = new ITaskItem[0];
             this.OutputPath = Path.GetFullPath(this.OutputPath);
+            propertyProvider = new PropertyProvider(ProjectPath, ReferenceLibraries
+                .Where(libItem =>
+                {
+                    var copyLocal = libItem.GetMetadata("Private");
+                    return String.IsNullOrEmpty(copyLocal) || String.Compare(copyLocal, "false", true) != 0;
+                }).ToArray());
             Directory.CreateDirectory(this.OutputPath);
             // add build dependencies from the nuspec file(s)
             // and the list of project references
-            this.sourceList.AddRange(this.NuSpec);
             this.sourceList.AddRange(this.ReferenceLibraries);
             // parse the version source name
             this.versionSource = (VersionSource)Enum.Parse(
@@ -127,7 +148,10 @@ namespace NuBuild.MSBuild
             // configure each nuspec item
             foreach (var specItem in this.NuSpec)
                PreparePackage(specItem);
+            // add build dependencies from the embedded resource file(s)
+            this.sourceList.AddRange(this.Embedded);
             // return the list of build sources/targets
+            this.Prepared = this.preparedList.ToArray();
             this.Sources = this.sourceList.ToArray();
             this.Targets = this.targetList.ToArray();
          }
@@ -149,39 +173,56 @@ namespace NuBuild.MSBuild
          // parse the .nuspec file
          // extract elements without namespaces to avoid
          // issues with multiple .nuspec versions
-         var specPath = specItem.GetMetadata("FullPath");
-         var specDoc = XDocument.Load(specPath);
-         var fileElems = specDoc
-            .Root
-            .Elements()
-            .Where(e => e.Name.LocalName == "files")
-            .SelectMany(e => e.Elements())
-            .Where(e => e.Attribute("src") != null);
-         // construct the path to the NuGet package to build
-         var pkgID = GetPackageID(specDoc);
-         var pkgVersion = GetPackageVersion(specItem, specDoc);
-         var pkgFile = this.VersionFileName ?
-            String.Format("{0}.{1}.nupkg", pkgID, pkgVersion) :
-            String.Format("{0}.nupkg", pkgID);
-         var pkgPath = Path.Combine(this.OutputPath, pkgFile);
-         // add custom metadata to the .nuspec build item
-         specItem.SetMetadata("NuPackagePath", pkgPath);
-         if (pkgVersion != null)
-            specItem.SetMetadata("NuPackageVersion", pkgVersion.ToString());
-         // add the list of files referenced by the .nuspec file
-         // to the dependency list for the build, and add the
-         // package file to the target list
-         this.sourceList.AddRange(
-            fileElems.Select(
-               e => new TaskItem(
-                  Path.Combine(
-                     specItem.GetMetadata("RootDir"),
-                     specItem.GetMetadata("Directory"),
-                     e.Attribute("src").Value
+         var pkgPath = (String)null;
+         try
+         {
+            var specPath = specItem.GetMetadata("FullPath");
+            var specDoc = XDocument.Load(specPath);
+            var fileElems = specDoc
+               .Root
+               .Elements()
+               .Where(e => e.Name.LocalName == "files")
+               .SelectMany(e => e.Elements())
+               .Where(e => e.Attribute("src") != null);
+            // construct the path to the NuGet package to build
+            var pkgID = GetPackageID(specDoc);
+            var pkgVersion = GetPackageVersion(specItem, specDoc);
+            var pkgFile = this.VersionFileName ?
+               String.Format("{0}.{1}.nupkg", pkgID, pkgVersion) :
+               String.Format("{0}.nupkg", pkgID);
+            pkgPath = Path.Combine(this.OutputPath, pkgFile);
+            // add custom metadata to the .nuspec build item
+            specItem.SetMetadata("NuPackagePath", pkgPath);
+            if (pkgVersion != null)
+               specItem.SetMetadata("NuPackageVersion", pkgVersion.ToString());
+            // add the list of files referenced by the .nuspec file
+            // to the dependency list for the build, and add the
+            // package file to the target list
+            this.sourceList.AddRange(
+               fileElems.Select(
+                  e => new TaskItem(
+                     Path.Combine(
+                        specItem.GetMetadata("RootDir"),
+                        specItem.GetMetadata("Directory"),
+                        e.Attribute("src").Value
+                     )
                   )
                )
-            )
-         );
+            );
+         }
+         catch (Exception e)
+         {
+            if (specItem.GetMetadata("Extension") != ".nuspec")
+            {
+               Log.LogWarning(
+                  "The source item '{0}' is not a valid .nuspec file! Change Build Action from Compile to None or Embedded Resource. File skipped.\n{1} ({2})",
+                  specItem.GetMetadata("FullPath"), e.Message, e.GetType().Name);
+               return;
+            }
+            throw;
+         }
+         this.preparedList.Add(specItem);
+         this.sourceList.Add(specItem);
          this.targetList.Add(new TaskItem(pkgPath));
       }
       /// <summary>
@@ -202,18 +243,7 @@ namespace NuBuild.MSBuild
             .Elements()
             .Single(e => e.Name.LocalName == "id")
             .Value;
-         if (id == "$id$")
-         {
-            foreach (var libItem in this.ReferenceLibraries)
-            {
-               try
-               {
-                  id = AssemblyReader.Read(libItem.GetMetadata("FullPath")).Name;
-                  break;
-               }
-               catch { }
-            }
-         }
+         id = propertyProvider.Process(id);
          return id;
       }
       /// <summary>

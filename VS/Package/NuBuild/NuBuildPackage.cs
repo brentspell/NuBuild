@@ -23,7 +23,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Microsoft.VisualStudio.Project;
 using Microsoft.VisualStudio.Shell;
 // Project References
 
@@ -42,19 +41,19 @@ namespace NuBuild.VS
    [Guid(NuBuildPackage.PackageGuidString)]
    [ProvideProjectFactory(
       typeof(NuBuildFactory),
+      "NuGet packaging project",
       null,
-      "NuBuild Project Files (*.nuproj)",
-      "nuproj",
-      "nuproj",
-      @".\NullPath",
-      LanguageVsTemplate = "NuGet")]
-   [ProvideObject(typeof(NuBuildPropertyPage))]
-   public sealed class NuBuildPackage : ProjectPackage
+      null,
+      null,
+      @"..\Templates\Projects")]
+   [ProvideObject(typeof(NuBuildPropertyPagePackage), RegisterUsing = RegistrationMethod.CodeBase)]
+   [ProvideObject(typeof(NuBuildPropertyPageBuild), RegisterUsing = RegistrationMethod.CodeBase)]
+   public sealed class NuBuildPackage : Package
    {
-      public const String PackageGuidString = "e09dd79a-4488-4ab9-8d3f-a7eee78bf432";
+      //public const String PackageGuidString = "e09dd79a-4488-4ab9-8d3f-a7eee78bf432";
+      public const String PackageGuidString = "165BA684-99B5-4AC7-AE57-2E317F2181F1";
       public static readonly Guid PackageGuid = new Guid(PackageGuidString);
 
-      #region ProjectPackage Overrides
       /// <summary>
       /// Initializes a new package instance
       /// </summary>
@@ -63,13 +62,5 @@ namespace NuBuild.VS
          base.Initialize();
          RegisterProjectFactory(new NuBuildFactory(this));
       }
-      /// <summary>
-      /// NuBuild product user context
-      /// </summary>
-      public override String ProductUserContext
-      {
-         get { return null; }
-      }
-      #endregion
    }
 }

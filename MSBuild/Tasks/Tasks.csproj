@@ -32,6 +32,7 @@
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Web.XmlTransform">
       <HintPath>..\..\packages\Microsoft.Web.Xdt.1.0.0\lib\net40\Microsoft.Web.XmlTransform.dll</HintPath>
     </Reference>
@@ -51,6 +52,9 @@
     <Compile Include="NuPrepare.cs" />
     <Compile Include="NuPackage.cs" />
     <Compile Include="Utility\AssemblyReader.cs" />
+    <Compile Include="Utility\IPropertyProviderExtensions.cs" />
+    <Compile Include="Utility\PropertyProvider.cs" />
+    <Compile Include="Utility\TokenProcessingPhysicalPackageFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.csproj">

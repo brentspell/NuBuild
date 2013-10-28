@@ -18,7 +18,6 @@
 //    51 Franklin Street, Fifth Floor 
 //    Boston, MA 02110-1301 USA
 //===========================================================================
-// System References
 #region using Directives
 // System References
 using System;
@@ -33,6 +32,7 @@ namespace NuBuild.VS
 {
    /// <summary>
    /// DescriptionAttribute-based enum type converter
+   /// Description format (optional): "valueInTextFile|Value on screen"
    /// </summary>
    /// <remarks>
    /// This class supports converting enum types to the
@@ -81,12 +81,12 @@ namespace NuBuild.VS
             // . then, attempt to retrieve the symbolic name for the enum
             // . finally, fall back on the numeric value if the value does
             //   not exist within the enumeration itself
-            FieldInfo field = value.GetType().GetField(value.ToString());
+            FieldInfo field = base.EnumType.GetField(((EnumType)value).ToString());
             if (field != null)
                return field
                   .GetCustomAttributes(true)
                   .OfType<DescriptionAttribute>()
-                  .Select(a => a.Description)
+                  .Select(a => a.Description.Split('|')[0])
                   .Where(d => !String.IsNullOrWhiteSpace(d))
                   .DefaultIfEmpty(field.Name)
                   .First();
@@ -110,8 +110,8 @@ namespace NuBuild.VS
       /// The enumeration value corresponding to the description
       /// </returns>
       public override Object ConvertFrom (
-         ITypeDescriptorContext context, 
-         System.Globalization.CultureInfo culture, 
+         ITypeDescriptorContext context,
+         System.Globalization.CultureInfo culture,
          Object value)
       {
          if (value.GetType() == typeof(String))
@@ -124,12 +124,50 @@ namespace NuBuild.VS
             {
                var attr = field.GetCustomAttributes(true)
                   .OfType<DescriptionAttribute>()
-                  .FirstOrDefault(a => String.Compare(a.Description, (String)value, true) == 0);
+                  .FirstOrDefault(a => String.Compare(a.Description.Split('|')[0], (String)value, true) == 0);
                if (attr != null)
                   return Enum.ToObject(base.EnumType, field.GetRawConstantValue());
             }
          }
          return base.ConvertFrom(context, culture, value);
+      }
+
+      /// <summary>
+      /// Gets a collection of standard key value pairs for the data type this validator is designed for
+      /// </summary>
+      /// <param name="context">
+      /// The type descriptor context
+      /// </param>
+      /// <returns>
+      /// The enumeration value corresponding to the description
+      /// </returns>
+      public override TypeConverter.StandardValuesCollection GetStandardValues(
+         ITypeDescriptorContext context)
+      {
+         return new TypeConverter.StandardValuesCollection(
+            Enum
+            .GetValues(typeof(EnumType))
+            .Cast<EnumType>()
+            .Select(p =>
+            {
+               var value = p.ToString();
+               var description = value;
+               var memInfo = typeof(EnumType).GetMember(p.ToString());
+               if (memInfo != null && memInfo.Length > 0)
+               {
+                  var attrs = memInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
+                  var descriptions = (string[])null;
+                  if (attrs != null && attrs.Length > 0)
+                     descriptions = ((DescriptionAttribute)attrs[0]).Description.Split('|');
+                  if (descriptions != null)
+                  {
+                     value = descriptions[0];
+                     description = descriptions[descriptions.Length - 1];
+                  }
+               }
+               return new EnumDescription(Convert.ToInt32(p), value, description);
+            })
+            .ToList());
       }
    }
 }

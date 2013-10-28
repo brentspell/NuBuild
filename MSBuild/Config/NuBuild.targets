@@ -32,7 +32,7 @@
       <NuBuildIncludePdbs Condition="'$(NuBuildIncludePdbs)' == ''">false</NuBuildIncludePdbs>
       <!-- Properties: NuBuildAddBinariesToSubfolder
          . specifies whether to add binaries (.dll and .exe files) from referenced projects into subfolders
-         (eg. lib\net40) based on TargetFrameworkVersion
+           (eg. lib\net40) based on TargetFrameworkVersion
       -->
       <NuBuildAddBinariesToSubfolder Condition="'$(NuBuildAddBinariesToSubfolder)' == ''">false</NuBuildAddBinariesToSubfolder>
       <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
@@ -64,14 +64,16 @@
       <MSBuild Projects="@(ProjectReference)" UseResultsCache="true">
          <Output TaskParameter="TargetOutputs" ItemName="__ReferenceLibraries" />
       </MSBuild>
-      <NuPrepare NuSpec="@(Compile)"
+      <NuPrepare ProjectPath="$(MSBuildProjectFullPath)"
+                 NuSpec="@(Compile)"
+                 Embedded="@(EmbeddedResource)"
                  ProjectName="$(MSBuildProjectName)"
                  VersionSource="$(NuBuildVersionSource)"
                  VersionFileName="$(NuBuildVersionFileName)"
                  OutputPath="$(OutputPath)"
                  BuildNumber="$(BuildNumber)"
                  ReferenceLibraries="@(__ReferenceLibraries)">
-         <Output TaskParameter="NuSpec" ItemName="NuPrepared"/>
+         <Output TaskParameter="Prepared" ItemName="NuPrepared"/>
          <Output TaskParameter="Sources" ItemName="NuSources"/>
          <Output TaskParameter="Targets" ItemName="NuTargets"/>
       </NuPrepare>
@@ -79,7 +81,7 @@
          <NuSources Include="$(MSBuildProjectFile);"/>
       </ItemGroup>
       <ItemGroup>
-         <NuTargets Include="@(CopyToOutputDirectoryItems);"/>
+         <NuTargets Include="@(CopyToOutputDirectoryItems->'$(OutputPath)%(TargetPath)');"/>
       </ItemGroup>
       <Message Text="NuSources: @(NuSources)"/>
       <Message Text="NuTargets: @(NuTargets)"/>
@@ -100,6 +102,7 @@
            Outputs="@(NuTargets)">
       <NuPackage ProjectPath="$(MSBuildProjectFullPath)"
                  NuSpec="@(NuPrepared)"
+                 Embedded="@(EmbeddedResource)"
                  OutputPath="$(OutputPath)"
                  ReferenceLibraries="@(__ReferenceLibraries)"
                  AddBinariesToSubfolder="$(NuBuildAddBinariesToSubfolder)"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- See http://stackoverflow.com/questions/471424/wix-tricks-and-tips -->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-   <?define ProductVersion = "1.8.0"?>
+   <?define ProductVersion = "2.0.0"?>
    <Product Id="*"
       UpgradeCode="1948F590-CD4C-4279-9466-5A172FEA8FCE"
       Name="NuBuild Project System" 
@@ -9,7 +9,7 @@
       Manufacturer="Brent M. Spell"
       Language="1033">
       <Package
-         Description="A NuGet project system for Visual Studio" 
+         Description="A NuGet packaging project system for Visual Studio" 
          Keywords="nuget nuproj build system visual studio"
          Compressed="yes"
          InstallPrivileges="elevated"/>
@@ -27,10 +27,16 @@
          <Directory Id="VS2010ExtFolder" Name="Ext2010">
             <Directory Id="VS2010ExtNuBuildFolder" Name="NuBuild">
                <Directory Id="VS2010ExtNuBuildNuBuildFolder" Name="NuBuild">
+                  <!--
                   <Directory Id="VS2010ExtNuBuildV1Folder" Name="1.1">
                      <Directory Id="VS2010ExtNuBuildV1ResourcesFolder" Name="Resources"/>
                      <Directory Id="VS2010ExtNuBuildV1ProjectTemplatesFolder" Name="ProjectTemplates"/>
                      <Directory Id="VS2010ExtNuBuildV1ItemTemplatesFolder" Name="ItemTemplates"/>
+                     -->
+                  <Directory Id="VS2010ExtNuBuildV2Folder" Name="2.0">
+                     <Directory Id="VS2010ExtNuBuildV2ResourcesFolder" Name="Resources"/>
+                     <Directory Id="VS2010ExtNuBuildV2ProjectTemplatesFolder" Name="ProjectTemplates"/>
+                     <Directory Id="VS2010ExtNuBuildV2ItemTemplatesFolder" Name="ItemTemplates"/>
                   </Directory>
                </Directory>
             </Directory>
@@ -39,10 +45,16 @@
          <Directory Id="VS2012ExtFolder" Name="Ext2012">
             <Directory Id="VS2012ExtNuBuildFolder" Name="NuBuild">
                <Directory Id="VS2012ExtNuBuildNuBuildFolder" Name="NuBuild">
+                  <!--
                   <Directory Id="VS2012ExtNuBuildV1Folder" Name="1.1">
                      <Directory Id="VS2012ExtNuBuildV1ResourcesFolder" Name="Resources"/>
                      <Directory Id="VS2012ExtNuBuildV1ProjectTemplatesFolder" Name="ProjectTemplates"/>
                      <Directory Id="VS2012ExtNuBuildV1ItemTemplatesFolder" Name="ItemTemplates"/>
+                     -->
+                  <Directory Id="VS2012ExtNuBuildV2Folder" Name="2.0">
+                     <Directory Id="VS2012ExtNuBuildV2ResourcesFolder" Name="Resources"/>
+                     <Directory Id="VS2012ExtNuBuildV2ProjectTemplatesFolder" Name="ProjectTemplates"/>
+                     <Directory Id="VS2012ExtNuBuildV2ItemTemplatesFolder" Name="ItemTemplates"/>
                   </Directory>
                </Directory>
             </Directory>
@@ -74,6 +86,7 @@
          <!-- VS2010 Extension Files -->
          <Feature Id="VS2010" Level="1">
             <Condition Level="0">NOT Installed AND NOT VS2010INSTALLDIR</Condition>
+            <!--
             <Component Id="VS2010_NuBuild_Package_dll" Guid="{695A5D27-3FB8-4958-A930-D3D308A26945}" Directory="VS2010ExtNuBuildV1Folder">
                <File Id="VS2010_NuBuild_Package_dll" Source="..\Bin\VS\NuBuild.VS.Package.dll"/>
             </Component>
@@ -98,10 +111,36 @@
             <Component Id="VS2010_NuSpec_zip" Guid="{470120E5-116A-4781-86BB-37023EE0C1E1}" Directory="VS2010ExtNuBuildV1ItemTemplatesFolder">
                <File Id="VS2010_NuSpec_zip" Source="..\Bin\VS\ItemTemplates\NuSpec.zip"/>
             </Component>
+            -->
+            <Component Id="VS2010_NuBuild_Package_dll" Guid="{17BE743E-952C-4B7F-9D95-ED401EB007E3}" Directory="VS2010ExtNuBuildV2Folder">
+               <File Id="VS2010_NuBuild_Package_dll" Source="..\Bin\VS\NuBuild.VS.Package.dll"/>
+            </Component>
+            <Component Id="VS2010_NuBuild_Core_dll" Guid="{2A103385-5490-41A4-BB7E-13F2058BEB8D}" Directory="VS2010ExtNuBuildV2Folder">
+               <File Id="VS2010_NuBuild_Core_dll" Source="..\Bin\NuBuild.Core.dll"/>
+            </Component>
+            <Component Id="VS2010_NuBuild_Package_pkgdef" Guid="{8E85F730-E8EF-44F4-8C54-A162D6D840A9}" Directory="VS2010ExtNuBuildV2Folder">
+               <File Id="VS2010_NuBuild_Package_pkgdef" Source="..\Bin\VS\NuBuild.VS.Package.pkgdef"/>
+            </Component>
+            <Component Id="VS2010_Extension_vsixmanifest" Guid="{947F962B-EF90-4CED-899B-E9CF8EC98E86}" Directory="VS2010ExtNuBuildV2Folder">
+               <File Id="VS2010_Extension_vsixmanifest" Source="..\Bin\VS\extension.vsixmanifest"/>
+            </Component>
+            <Component Id="VS2010_license_txt" Guid="{93344E44-CF21-4726-BAEB-F2DF2ABF886A}" Directory="VS2010ExtNuBuildV2ResourcesFolder">
+               <File Id="VS2010_license_txt" Source="..\Bin\VS\Resources\license.txt"/>
+            </Component>
+            <Component Id="VS2010_NuBuild_png" Guid="{DC08CA40-733B-486C-BEBA-8216D1ECE672}" Directory="VS2010ExtNuBuildV2ResourcesFolder">
+               <File Id="VS2010_NuBuild_png" Source="..\Bin\VS\Resources\nubuild.png"/>
+            </Component>
+            <Component Id="VS2010_NuProj_zip" Guid="{B2DE0538-5D74-45C3-9595-34BD63084DE7}" Directory="VS2010ExtNuBuildV2ProjectTemplatesFolder">
+               <File Id="VS2010_NuProj_zip" Source="..\Bin\VS\ProjectTemplates\NuProj.zip"/>
+            </Component>
+            <Component Id="VS2010_NuSpec_zip" Guid="{D9F65F99-BEF7-4297-99A1-F2D7CA0BBB49}" Directory="VS2010ExtNuBuildV2ItemTemplatesFolder">
+               <File Id="VS2010_NuSpec_zip" Source="..\Bin\VS\ItemTemplates\NuSpec.zip"/>
+            </Component>
          </Feature>
          <!-- VS2012 Extension Files -->
          <Feature Id="VS2012" Level="1">
             <Condition Level="0">NOT Installed AND NOT VS2012INSTALLDIR</Condition>
+            <!--
             <Component Id="VS2012_NuBuild_Package_dll" Guid="{5F4701E0-D4FC-41A3-82E5-23BDCC17FCDA}" Directory="VS2012ExtNuBuildV1Folder">
                <File Id="VS2012_NuBuild_Package_dll" Source="..\Bin\VS\NuBuild.VS.Package.dll"/>
             </Component>
@@ -126,9 +165,34 @@
             <Component Id="VS2012_NuSpec_zip" Guid="{FB2F5A86-5570-4B3C-AA74-60E54FA5F92D}" Directory="VS2012ExtNuBuildV1ItemTemplatesFolder">
                <File Id="VS2012_NuSpec_zip" Source="..\Bin\VS\ItemTemplates\NuSpec.zip"/>
             </Component>
+            -->
+            <Component Id="VS2012_NuBuild_Package_dll" Guid="{006577D1-8091-4E41-A369-0ABDDCB9CDB2}" Directory="VS2012ExtNuBuildV2Folder">
+               <File Id="VS2012_NuBuild_Package_dll" Source="..\Bin\VS\NuBuild.VS.Package.dll"/>
+            </Component>
+            <Component Id="VS2012_NuBuild_Core_dll" Guid="{8A8D31AF-77B0-448E-B6DB-76EC0C70387F}" Directory="VS2012ExtNuBuildV2Folder">
+               <File Id="VS2012_NuBuild_Core_dll" Source="..\Bin\NuBuild.Core.dll"/>
+            </Component>
+            <Component Id="VS2012_NuBuild_Package_pkgdef" Guid="{EFB669E9-F258-44CF-BAF9-15613CEBF0EF}" Directory="VS2012ExtNuBuildV2Folder">
+               <File Id="VS2012_NuBuild_Package_pkgdef" Source="..\Bin\VS\NuBuild.VS.Package.pkgdef"/>
+            </Component>
+            <Component Id="VS2012_Extension_vsixmanifest" Guid="{4B66CE67-C29D-4EB1-8B45-6EE51FDF0B70}" Directory="VS2012ExtNuBuildV2Folder">
+               <File Id="VS2012_Extension_vsixmanifest" Source="..\Bin\VS\extension.vsixmanifest"/>
+            </Component>
+            <Component Id="VS2012_license_txt" Guid="{29338CDD-BCE5-4A8F-B531-594C237E7DC3}" Directory="VS2012ExtNuBuildV2ResourcesFolder">
+               <File Id="VS2012_license_txt" Source="..\Bin\VS\Resources\license.txt"/>
+            </Component>
+            <Component Id="VS2012_NuBuild_png" Guid="{6370537B-6208-4BA8-88FC-EED804AF4738}" Directory="VS2012ExtNuBuildV2ResourcesFolder">
+               <File Id="VS2012_NuBuild_png" Source="..\Bin\VS\Resources\nubuild.png"/>
+            </Component>
+            <Component Id="VS2012_NuProj_zip" Guid="{6331AFE0-E4D9-4195-956C-3FC8311EF4FF}" Directory="VS2012ExtNuBuildV2ProjectTemplatesFolder">
+               <File Id="VS2012_NuProj_zip" Source="..\Bin\VS\ProjectTemplates\NuProj.zip"/>
+            </Component>
+            <Component Id="VS2012_NuSpec_zip" Guid="{E25C5DDC-36CC-4B19-A3CD-2C92CEC63B78}" Directory="VS2012ExtNuBuildV2ItemTemplatesFolder">
+               <File Id="VS2012_NuSpec_zip" Source="..\Bin\VS\ItemTemplates\NuSpec.zip"/>
+            </Component>
          </Feature>
          <!-- .nuproj Extension Registry -->
-         <Component Id="NuBuild_Reg_nuproj" Guid="*" Directory="MSBuildNuBuildV1Folder">
+         <!--<Component Id="NuBuild_Reg_nuproj" Guid="*" Directory="MSBuildNuBuildV1Folder">
             <RegistryKey Root="HKCR" Key=".nuproj">
                <RegistryValue Type="string" Value="NuBuild.NuProj"/>
             </RegistryKey>
@@ -145,7 +209,7 @@
                   </RegistryKey>
                </RegistryKey>
             </RegistryKey>
-         </Component>
+         </Component>-->
       </Feature>
       <MajorUpgrade
          AllowSameVersionUpgrades="yes"
