@@ -23,6 +23,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using NuGet;
 // Project References
 
@@ -30,6 +31,7 @@ namespace NuBuild.MSBuild
 {
    public class TokenProcessingPhysicalPackageFile : PhysicalPackageFile, IPackageFile
    {
+      private static readonly Regex _tokenRegex = new Regex(@"\$\((?<propertyName>\w+)\)\$");
       private IPropertyProvider propertyProvider;
 
       public TokenProcessingPhysicalPackageFile(IPropertyProvider propertyProvider)
@@ -41,7 +43,8 @@ namespace NuBuild.MSBuild
 
       public new Stream GetStream()
       {
-         return propertyProvider.Process(base.GetStream());
+         return _tokenRegex.Replace(propertyProvider.Process(base.GetStream().ReadToEnd()),
+             match => "$" + match.Groups["propertyName"].Value + "$").AsStream();
       }
 
       #endregion
