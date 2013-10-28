@@ -97,7 +97,12 @@ namespace NuBuild.MSBuild
             if (this.ReferenceLibraries == null)
                this.ReferenceLibraries = new ITaskItem[0];
             this.OutputPath = Path.GetFullPath(this.OutputPath);
-            propertyProvider = new PropertyProvider(ProjectPath, ReferenceLibraries);
+            propertyProvider = new PropertyProvider(ProjectPath, ReferenceLibraries
+                .Where(libItem => 
+                {
+                    var copyLocal = libItem.GetMetadata("Private");
+                    return String.IsNullOrEmpty(copyLocal) || String.Compare(copyLocal, "false", true) != 0;
+                }).ToArray());
             // compile the nuget package
             foreach (var specItem in this.NuSpec)
                BuildPackage(specItem);
