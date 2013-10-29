@@ -215,7 +215,9 @@
       <CustomAction Id="ExecuteVS2010Setup"
          Directory="VS2010Folder"
          Return="asyncWait"
-         ExeCommand="[VS2010Folder]devenv.exe -setup"/>
+         Execute="deferred" 
+         Impersonate="no"
+         ExeCommand="[VS2010Folder]devenv.exe /setup"/>
       <!-- VS2012 Setup Actions -->
       <Property Id="VS2012INSTALLDIR">
          <RegistrySearch
@@ -232,7 +234,9 @@
       <CustomAction Id="ExecuteVS2012Setup"
          Directory="VS2012Folder"
          Return="asyncWait"
-         ExeCommand="[VS2012Folder]devenv.exe -setup"/>
+         Execute="deferred" 
+         Impersonate="no"
+         ExeCommand="[VS2012Folder]devenv.exe /setup"/>
       <!-- VS2013 Setup Actions -->
       <Property Id="VS2013INSTALLDIR">
          <RegistrySearch 
@@ -249,15 +253,17 @@
       <CustomAction Id="ExecuteVS2013Setup"
          Directory="VS2013Folder"
          Return="asyncWait"
-         ExeCommand="[VS2013Folder]devenv.exe -setup"/>
+         Execute="deferred" 
+         Impersonate="no"
+         ExeCommand="[VS2013Folder]devenv.exe /setup"/>
       <!-- Installation Ordering -->
       <InstallExecuteSequence>
          <Custom Action="SetVS2010Folder" After="CostFinalize">VS2010INSTALLDIR</Custom>
-         <Custom Action="ExecuteVS2010Setup" After="InstallFiles">NOT REMOVE AND VS2010INSTALLDIR</Custom>
+         <Custom Action="ExecuteVS2010Setup" Before="InstallFinalize">NOT REMOVE AND VS2010INSTALLDIR</Custom>
          <Custom Action="SetVS2012Folder" After="CostFinalize">VS2012INSTALLDIR</Custom>
-         <Custom Action="ExecuteVS2012Setup" After="InstallFiles">NOT REMOVE AND VS2012INSTALLDIR</Custom>
+         <Custom Action="ExecuteVS2012Setup" Before="InstallFinalize">NOT REMOVE AND VS2012INSTALLDIR</Custom>
          <Custom Action="SetVS2013Folder" After="CostFinalize">VS2013INSTALLDIR</Custom>
-         <Custom Action="ExecuteVS2013Setup" After="InstallFiles">NOT REMOVE AND VS2013INSTALLDIR</Custom>
+         <Custom Action="ExecuteVS2013Setup" Before="InstallFinalize">NOT REMOVE AND VS2013INSTALLDIR</Custom>
       </InstallExecuteSequence>
    </Product>
 </Wix>
