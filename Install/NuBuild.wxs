@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- See http://stackoverflow.com/questions/471424/wix-tricks-and-tips -->
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-   <?define ProductVersion = "1.8.0"?>
+   <?define ProductVersion = "1.9.0"?>
    <Product Id="*"
       UpgradeCode="1948F590-CD4C-4279-9466-5A172FEA8FCE"
       Name="NuBuild Project System" 
@@ -24,25 +24,43 @@
             </Directory>
          </Directory>
          <!-- VS 2010 Extension Directories -->
-         <Directory Id="VS2010ExtFolder" Name="Ext2010">
-            <Directory Id="VS2010ExtNuBuildFolder" Name="NuBuild">
-               <Directory Id="VS2010ExtNuBuildNuBuildFolder" Name="NuBuild">
-                  <Directory Id="VS2010ExtNuBuildV1Folder" Name="1.1">
-                     <Directory Id="VS2010ExtNuBuildV1ResourcesFolder" Name="Resources"/>
-                     <Directory Id="VS2010ExtNuBuildV1ProjectTemplatesFolder" Name="ProjectTemplates"/>
-                     <Directory Id="VS2010ExtNuBuildV1ItemTemplatesFolder" Name="ItemTemplates"/>
+         <Directory Id="VS2010Folder" Name="VS2010">
+            <Directory Id="VS2010ExtFolder" Name="Extensions">
+               <Directory Id="VS2010ExtNuBuildFolder" Name="NuBuild">
+                  <Directory Id="VS2010ExtNuBuildNuBuildFolder" Name="NuBuild">
+                     <Directory Id="VS2010ExtNuBuildV1Folder" Name="1.1">
+                        <Directory Id="VS2010ExtNuBuildV1ResourcesFolder" Name="Resources"/>
+                        <Directory Id="VS2010ExtNuBuildV1ProjectTemplatesFolder" Name="ProjectTemplates"/>
+                        <Directory Id="VS2010ExtNuBuildV1ItemTemplatesFolder" Name="ItemTemplates"/>
+                     </Directory>
                   </Directory>
                </Directory>
             </Directory>
          </Directory>
          <!-- VS 2012 Extension Directories -->
-         <Directory Id="VS2012ExtFolder" Name="Ext2012">
-            <Directory Id="VS2012ExtNuBuildFolder" Name="NuBuild">
-               <Directory Id="VS2012ExtNuBuildNuBuildFolder" Name="NuBuild">
-                  <Directory Id="VS2012ExtNuBuildV1Folder" Name="1.1">
-                     <Directory Id="VS2012ExtNuBuildV1ResourcesFolder" Name="Resources"/>
-                     <Directory Id="VS2012ExtNuBuildV1ProjectTemplatesFolder" Name="ProjectTemplates"/>
-                     <Directory Id="VS2012ExtNuBuildV1ItemTemplatesFolder" Name="ItemTemplates"/>
+         <Directory Id="VS2012Folder" Name="VS2012">
+            <Directory Id="VS2012ExtFolder" Name="Extensions">
+               <Directory Id="VS2012ExtNuBuildFolder" Name="NuBuild">
+                  <Directory Id="VS2012ExtNuBuildNuBuildFolder" Name="NuBuild">
+                     <Directory Id="VS2012ExtNuBuildV1Folder" Name="1.1">
+                        <Directory Id="VS2012ExtNuBuildV1ResourcesFolder" Name="Resources"/>
+                        <Directory Id="VS2012ExtNuBuildV1ProjectTemplatesFolder" Name="ProjectTemplates"/>
+                        <Directory Id="VS2012ExtNuBuildV1ItemTemplatesFolder" Name="ItemTemplates"/>
+                     </Directory>
+                  </Directory>
+               </Directory>
+            </Directory>
+         </Directory>
+         <!-- VS 2013 Extension Directories -->
+         <Directory Id="VS2013Folder" Name="VS2013">
+            <Directory Id="VS2013ExtFolder" Name="Extensions">
+               <Directory Id="VS2013ExtNuBuildFolder" Name="NuBuild">
+                  <Directory Id="VS2013ExtNuBuildNuBuildFolder" Name="NuBuild">
+                     <Directory Id="VS2013ExtNuBuildV1Folder" Name="1.1">
+                        <Directory Id="VS2013ExtNuBuildV1ResourcesFolder" Name="Resources"/>
+                        <Directory Id="VS2013ExtNuBuildV1ProjectTemplatesFolder" Name="ProjectTemplates"/>
+                        <Directory Id="VS2013ExtNuBuildV1ItemTemplatesFolder" Name="ItemTemplates"/>
+                     </Directory>
                   </Directory>
                </Directory>
             </Directory>
@@ -127,6 +145,34 @@
                <File Id="VS2012_NuSpec_zip" Source="..\Bin\VS\ItemTemplates\NuSpec.zip"/>
             </Component>
          </Feature>
+         <!-- VS2013 Extension Files -->
+         <Feature Id="VS2013" Level="1">
+            <Condition Level="0">NOT Installed AND NOT VS2013INSTALLDIR</Condition>
+            <Component Id="VS2013_NuBuild_Package_dll" Guid="{8F985601-7882-499A-8AC5-22465595EB53}" Directory="VS2013ExtNuBuildV1Folder">
+               <File Id="VS2013_NuBuild_Package_dll" Source="..\Bin\VS\NuBuild.VS.Package.dll"/>
+            </Component>
+            <Component Id="VS2013_NuBuild_Core_dll" Guid="{79487FEC-6AC3-444A-ABD5-B6A4EB530313}" Directory="VS2013ExtNuBuildV1Folder">
+               <File Id="VS2013_NuBuild_Core_dll" Source="..\Bin\NuBuild.Core.dll"/>
+            </Component>
+            <Component Id="VS2013_NuBuild_Package_pkgdef" Guid="{3A02CE96-F356-4626-8B26-79484654E45C}" Directory="VS2013ExtNuBuildV1Folder">
+               <File Id="VS2013_NuBuild_Package_pkgdef" Source="..\Bin\VS\NuBuild.VS.Package.pkgdef"/>
+            </Component>
+            <Component Id="VS2013_Extension_vsixmanifest" Guid="{977DAFF7-E29C-42E6-AD55-9F02B70E3ED5}" Directory="VS2013ExtNuBuildV1Folder">
+               <File Id="VS2013_Extension_vsixmanifest" Source="..\Bin\VS\extension.vsixmanifest"/>
+            </Component>
+            <Component Id="VS2013_license_txt" Guid="{C2F98AAC-8CD2-49C1-8934-2583F5B200A9}" Directory="VS2013ExtNuBuildV1ResourcesFolder">
+               <File Id="VS2013_license_txt" Source="..\Bin\VS\Resources\license.txt"/>
+            </Component>
+            <Component Id="VS2013_NuBuild_png" Guid="{475F8FB6-523D-48E0-A035-A5002EDFF72A}" Directory="VS2013ExtNuBuildV1ResourcesFolder">
+               <File Id="VS2013_NuBuild_png" Source="..\Bin\VS\Resources\nubuild.png"/>
+            </Component>
+            <Component Id="VS2013_NuProj_zip" Guid="{B05A4EF3-2A14-4139-8DA3-E9D5850A08B1}" Directory="VS2013ExtNuBuildV1ProjectTemplatesFolder">
+               <File Id="VS2013_NuProj_zip" Source="..\Bin\VS\ProjectTemplates\NuProj.zip"/>
+            </Component>
+            <Component Id="VS2013_NuSpec_zip" Guid="{AACC64BF-A5B7-4456-828B-EE4D8E9967AB}" Directory="VS2013ExtNuBuildV1ItemTemplatesFolder">
+               <File Id="VS2013_NuSpec_zip" Source="..\Bin\VS\ItemTemplates\NuSpec.zip"/>
+            </Component>
+         </Feature>
          <!-- .nuproj Extension Registry -->
          <Component Id="NuBuild_Reg_nuproj" Guid="*" Directory="MSBuildNuBuildV1Folder">
             <RegistryKey Root="HKCR" Key=".nuproj">
@@ -150,7 +196,10 @@
       <MajorUpgrade
          AllowSameVersionUpgrades="yes"
          DowngradeErrorMessage="Downgrading is not supported."/>
-      <!-- Custom Actions -->
+      <SetProperty Id="ARPINSTALLLOCATION"
+         Value="[INSTALLFOLDER]"
+         After="CostFinalize"/>
+      <!-- VS2010 Setup Actions -->
       <Property Id="VS2010INSTALLDIR">
          <RegistrySearch 
             Id="VS2010InstallRegistry" 
@@ -159,6 +208,15 @@
             Name="InstallDir" 
             Type="directory" />
       </Property>
+      <CustomAction
+         Id="SetVS2010Folder"
+         Directory="VS2010Folder"
+         Value="[VS2010INSTALLDIR]" />
+      <CustomAction Id="ExecuteVS2010Setup"
+         Directory="VS2010Folder"
+         Return="asyncWait"
+         ExeCommand="[VS2010Folder]devenv.exe -setup"/>
+      <!-- VS2012 Setup Actions -->
       <Property Id="VS2012INSTALLDIR">
          <RegistrySearch
             Id="VS2012InstallRegistry"
@@ -168,21 +226,38 @@
             Type="directory" />
       </Property>
       <CustomAction
-         Id="SetVS2010ExtDirectory"
-         Directory="VS2010ExtFolder"
-         Value="[VS2010INSTALLDIR]\Extensions" />
+         Id="SetVS2012Folder"
+         Directory="VS2012Folder"
+         Value="[VS2012INSTALLDIR]" />
+      <CustomAction Id="ExecuteVS2012Setup"
+         Directory="VS2012Folder"
+         Return="asyncWait"
+         ExeCommand="[VS2012Folder]devenv.exe -setup"/>
+      <!-- VS2013 Setup Actions -->
+      <Property Id="VS2013INSTALLDIR">
+         <RegistrySearch 
+            Id="VS2013InstallRegistry" 
+            Root="HKLM" 
+            Key="SOFTWARE\Microsoft\VisualStudio\12.0" 
+            Name="InstallDir" 
+            Type="directory" />
+      </Property>
       <CustomAction
-         Id="SetVS2012ExtDirectory"
-         Directory="VS2012ExtFolder"
-         Value="[VS2012INSTALLDIR]\Extensions" />
-      <SetProperty Id="ARPINSTALLLOCATION"
-         Value="[INSTALLFOLDER]"
-         After="CostFinalize"/>
-      <CustomActionRef Id="VS2010Setup"/>
-      <CustomActionRef Id="VS2012Setup"/>
+         Id="SetVS2013Folder"
+         Directory="VS2013Folder"
+         Value="[VS2013INSTALLDIR]" />
+      <CustomAction Id="ExecuteVS2013Setup"
+         Directory="VS2013Folder"
+         Return="asyncWait"
+         ExeCommand="[VS2013Folder]devenv.exe -setup"/>
+      <!-- Installation Ordering -->
       <InstallExecuteSequence>
-         <Custom Action="SetVS2010ExtDirectory" After="CostFinalize">VS2010INSTALLDIR</Custom>
-         <Custom Action="SetVS2012ExtDirectory" After="CostFinalize">VS2012INSTALLDIR</Custom>
+         <Custom Action="SetVS2010Folder" After="CostFinalize">VS2010INSTALLDIR</Custom>
+         <Custom Action="ExecuteVS2010Setup" After="InstallFiles">NOT REMOVE AND VS2010INSTALLDIR</Custom>
+         <Custom Action="SetVS2012Folder" After="CostFinalize">VS2012INSTALLDIR</Custom>
+         <Custom Action="ExecuteVS2012Setup" After="InstallFiles">NOT REMOVE AND VS2012INSTALLDIR</Custom>
+         <Custom Action="SetVS2013Folder" After="CostFinalize">VS2013INSTALLDIR</Custom>
+         <Custom Action="ExecuteVS2013Setup" After="InstallFiles">NOT REMOVE AND VS2013INSTALLDIR</Custom>
       </InstallExecuteSequence>
    </Product>
 </Wix>
