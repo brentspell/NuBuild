@@ -42,6 +42,7 @@ namespace NuBuild.VS
       public const string VersionFileNamePropertyTag = "NuBuildVersionFileName";
       public const string TargetFrameworkVersionPropertyTag = "TargetFrameworkVersion";
       public const string AddBinariesToSubfolderPropertyTag = "NuBuildAddBinariesToSubfolder";
+      public const string AddDependenciesToMetadataTag = "NuBuildAddDependenciesToMetadata";
       public const string TransformOnBuildPropertyTag = "TransformOnBuild";
 
       #region Constructors
@@ -95,6 +96,7 @@ namespace NuBuild.VS
                propertyControlTable.Add(VersionFileNamePropertyTag, chkVersionFileName);
                propertyControlTable.Add(TargetFrameworkVersionPropertyTag, cbTargetFramework, new EnumDescriptionTypeConverter<TargetFramework>());
                propertyControlTable.Add(AddBinariesToSubfolderPropertyTag, chkAddBinariesToSubfolder);
+               propertyControlTable.Add(AddDependenciesToMetadataTag, chkAddDependenciesToMetadata);
                propertyControlTable.Add(TransformOnBuildPropertyTag, chkTransformOnBuild);
             }
             return propertyControlTable;

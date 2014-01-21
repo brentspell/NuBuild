@@ -37,9 +37,12 @@
          this.gbVersioning = new System.Windows.Forms.GroupBox();
          this.gbTransformation = new System.Windows.Forms.GroupBox();
          this.chkTransformOnBuild = new System.Windows.Forms.CheckBox();
+         this.gbDependencies = new System.Windows.Forms.GroupBox();
+         this.chkAddDependenciesToMetadata = new System.Windows.Forms.CheckBox();
          this.gbFramework.SuspendLayout();
          this.gbVersioning.SuspendLayout();
          this.gbTransformation.SuspendLayout();
+         this.gbDependencies.SuspendLayout();
          this.SuspendLayout();
          // 
          // chkVersionFileName
@@ -48,7 +51,7 @@
          this.chkVersionFileName.Location = new System.Drawing.Point(9, 46);
          this.chkVersionFileName.Name = "chkVersionFileName";
          this.chkVersionFileName.Size = new System.Drawing.Size(106, 17);
-         this.chkVersionFileName.TabIndex = 3;
+         this.chkVersionFileName.TabIndex = 2;
          this.chkVersionFileName.Text = "Version file name";
          // 
          // cbVersionSource
@@ -59,7 +62,7 @@
          this.cbVersionSource.Location = new System.Drawing.Point(110, 19);
          this.cbVersionSource.Name = "cbVersionSource";
          this.cbVersionSource.Size = new System.Drawing.Size(161, 21);
-         this.cbVersionSource.TabIndex = 2;
+         this.cbVersionSource.TabIndex = 1;
          this.cbVersionSource.ValueMember = "Key";
          // 
          // lVersionSource
@@ -79,7 +82,7 @@
          this.cbTargetFramework.Location = new System.Drawing.Point(110, 19);
          this.cbTargetFramework.Name = "cbTargetFramework";
          this.cbTargetFramework.Size = new System.Drawing.Size(161, 21);
-         this.cbTargetFramework.TabIndex = 6;
+         this.cbTargetFramework.TabIndex = 1;
          this.cbTargetFramework.ValueMember = "Key";
          // 
          // lTargetFramework
@@ -88,7 +91,7 @@
          this.lTargetFramework.Location = new System.Drawing.Point(6, 22);
          this.lTargetFramework.Name = "lTargetFramework";
          this.lTargetFramework.Size = new System.Drawing.Size(93, 13);
-         this.lTargetFramework.TabIndex = 5;
+         this.lTargetFramework.TabIndex = 0;
          this.lTargetFramework.Text = "Target framework:";
          // 
          // gbFramework
@@ -99,7 +102,7 @@
          this.gbFramework.Location = new System.Drawing.Point(3, 81);
          this.gbFramework.Name = "gbFramework";
          this.gbFramework.Size = new System.Drawing.Size(345, 72);
-         this.gbFramework.TabIndex = 4;
+         this.gbFramework.TabIndex = 1;
          this.gbFramework.TabStop = false;
          this.gbFramework.Text = "Framework";
          // 
@@ -109,7 +112,7 @@
          this.chkAddBinariesToSubfolder.Location = new System.Drawing.Point(9, 46);
          this.chkAddBinariesToSubfolder.Name = "chkAddBinariesToSubfolder";
          this.chkAddBinariesToSubfolder.Size = new System.Drawing.Size(196, 17);
-         this.chkAddBinariesToSubfolder.TabIndex = 7;
+         this.chkAddBinariesToSubfolder.TabIndex = 2;
          this.chkAddBinariesToSubfolder.Text = "Add referenced binaries to subfolder";
          this.chkAddBinariesToSubfolder.UseVisualStyleBackColor = true;
          // 
@@ -128,38 +131,63 @@
          // gbTransformation
          // 
          this.gbTransformation.Controls.Add(this.chkTransformOnBuild);
-         this.gbTransformation.Location = new System.Drawing.Point(3, 159);
+         this.gbTransformation.Enabled = false;
+         this.gbTransformation.Location = new System.Drawing.Point(3, 211);
          this.gbTransformation.Name = "gbTransformation";
          this.gbTransformation.Size = new System.Drawing.Size(345, 46);
-         this.gbTransformation.TabIndex = 8;
+         this.gbTransformation.TabIndex = 3;
          this.gbTransformation.TabStop = false;
          this.gbTransformation.Text = "Transformation";
          // 
          // chkTransformOnBuild
          // 
          this.chkTransformOnBuild.AutoSize = true;
+         this.chkTransformOnBuild.Enabled = false;
          this.chkTransformOnBuild.Location = new System.Drawing.Point(9, 19);
          this.chkTransformOnBuild.Name = "chkTransformOnBuild";
          this.chkTransformOnBuild.Size = new System.Drawing.Size(113, 17);
-         this.chkTransformOnBuild.TabIndex = 9;
+         this.chkTransformOnBuild.TabIndex = 0;
          this.chkTransformOnBuild.Text = "Transform on build";
          this.chkTransformOnBuild.UseVisualStyleBackColor = true;
+         // 
+         // gbDependencies
+         // 
+         this.gbDependencies.Controls.Add(this.chkAddDependenciesToMetadata);
+         this.gbDependencies.Location = new System.Drawing.Point(3, 159);
+         this.gbDependencies.Name = "gbDependencies";
+         this.gbDependencies.Size = new System.Drawing.Size(345, 46);
+         this.gbDependencies.TabIndex = 2;
+         this.gbDependencies.TabStop = false;
+         this.gbDependencies.Text = "Dependencies";
+         // 
+         // chkAddDependenciesToMetadata
+         // 
+         this.chkAddDependenciesToMetadata.AutoSize = true;
+         this.chkAddDependenciesToMetadata.Location = new System.Drawing.Point(9, 19);
+         this.chkAddDependenciesToMetadata.Name = "chkAddDependenciesToMetadata";
+         this.chkAddDependenciesToMetadata.Size = new System.Drawing.Size(174, 17);
+         this.chkAddDependenciesToMetadata.TabIndex = 0;
+         this.chkAddDependenciesToMetadata.Text = "Add dependencies to metadata";
+         this.chkAddDependenciesToMetadata.UseVisualStyleBackColor = true;
          // 
          // NuBuildPropertyPagePackageView
          // 
          this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
          this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+         this.Controls.Add(this.gbDependencies);
          this.Controls.Add(this.gbTransformation);
          this.Controls.Add(this.gbVersioning);
          this.Controls.Add(this.gbFramework);
          this.Name = "NuBuildPropertyPagePackageView";
-         this.Size = new System.Drawing.Size(355, 213);
+         this.Size = new System.Drawing.Size(355, 269);
          this.gbFramework.ResumeLayout(false);
          this.gbFramework.PerformLayout();
          this.gbVersioning.ResumeLayout(false);
          this.gbVersioning.PerformLayout();
          this.gbTransformation.ResumeLayout(false);
          this.gbTransformation.PerformLayout();
+         this.gbDependencies.ResumeLayout(false);
+         this.gbDependencies.PerformLayout();
          this.ResumeLayout(false);
 
 		}
@@ -176,5 +204,7 @@
       private System.Windows.Forms.CheckBox chkAddBinariesToSubfolder;
       private System.Windows.Forms.GroupBox gbTransformation;
       private System.Windows.Forms.CheckBox chkTransformOnBuild;
+      private System.Windows.Forms.GroupBox gbDependencies;
+      private System.Windows.Forms.CheckBox chkAddDependenciesToMetadata;
 	}
 }
