@@ -103,6 +103,11 @@ namespace NuBuild.MSBuild
          var ver = asm.GetName().Version;
          if (ver == new Version(0, 0, 0, 0))
             ver = null;
+         // retrieve the assembly title attribute
+         var title = CustomAttributeData.GetCustomAttributes(asm)
+            .Where(ad => ad.Constructor.DeclaringType == typeof(AssemblyTitleAttribute))
+            .Select(ad => (String)(ad.ConstructorArguments[0].Value))
+            .FirstOrDefault();
          // retrieve the assembly company attribute
          var company = CustomAttributeData.GetCustomAttributes(asm)
             .Where(ad => ad.Constructor.DeclaringType == typeof(AssemblyCompanyAttribute))
@@ -127,6 +132,7 @@ namespace NuBuild.MSBuild
          return new Properties()
          {
             Name = asm.GetName().Name,
+            Title = title,
             Version = ver,
             Description = desc,
             Copyright = copy,
@@ -142,6 +148,7 @@ namespace NuBuild.MSBuild
       public struct Properties
       {
          public String Name { get; set; }
+         public String Title { get; set; }
          public Version Version { get; set; }
          public String Company { get; set; }
          public String Description { get; set; }

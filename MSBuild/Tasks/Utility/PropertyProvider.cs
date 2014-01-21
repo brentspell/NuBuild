@@ -37,6 +37,7 @@ namespace NuBuild.MSBuild
       private static Dictionary<string, Func<AssemblyReader.Properties, string>> assemblyProperties = new Dictionary<string, Func<AssemblyReader.Properties, string>>()
       {
          { "id", p => p.Name },
+         { "title", p => p.Title },
          { "version", p => p.Version == null ? null : p.Version.ToString() },
          { "description", p => p.Description },
          { "copyright", p => p.Copyright },
