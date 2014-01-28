@@ -1,6 +1,6 @@
 ﻿//===========================================================================
-// MODULE:  AssemblyReader.cs
-// PURPOSE: Assembly property reader
+// MODULE:  TokenProcessingPhysicalPackageFile.cs
+// PURPOSE: PhysicalPackageFile, but replaces tokens
 // 
 // Copyright © 2012
 // Brent M. Spell. All rights reserved.

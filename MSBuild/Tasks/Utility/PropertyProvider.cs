@@ -1,5 +1,5 @@
 ﻿//===========================================================================
-// MODULE:  AssemblyReader.cs
+// MODULE:  PropertyProvider.cs
 // PURPOSE: Assembly property reader
 // 
 // Copyright © 2012

@@ -1,6 +1,6 @@
 ﻿//===========================================================================
-// MODULE:  AssemblyReader.cs
-// PURPOSE: Assembly property reader
+// MODULE:  IPropertyProviderExtensions.cs
+// PURPOSE: IPropertyProvider extensions
 // 
 // Copyright © 2012
 // Brent M. Spell. All rights reserved.
