@@ -108,7 +108,7 @@ namespace NuBuild.MSBuild
       public override Boolean Execute ()
       {
          try
-         {
+         {             
             // parepare the task for execution
             if (this.ReferenceLibraries == null)
                this.ReferenceLibraries = new ITaskItem[0];
@@ -129,7 +129,7 @@ namespace NuBuild.MSBuild
                PreparePackage(specItem);
             // return the list of build sources/targets
             this.Sources = this.sourceList.ToArray();
-            this.Targets = this.targetList.ToArray();
+            this.Targets = this.targetList.ToArray();             
          }
          catch (Exception e)
          {
