@@ -244,28 +244,28 @@
                <File Id="VS2013_NuSpec_zip" Source="..\Bin\VS\ItemTemplates\NuSpec.zip"/>
             </Component>
             -->
-            <Component Id="VS2013_NuBuild_Package_dll" Guid="{77654179-ea63-4270-8e48-c75d6988e029}" Directory="VS2013ExtNuBuildV1Folder">
+            <Component Id="VS2013_NuBuild_Package_dll" Guid="{77654179-ea63-4270-8e48-c75d6988e029}" Directory="VS2013ExtNuBuildV2Folder">
                <File Id="VS2013_NuBuild_Package_dll" Source="..\Bin\VS\NuBuild.VS.Package.dll"/>
             </Component>
-            <Component Id="VS2013_NuBuild_Core_dll" Guid="{d3058dab-f2f5-476b-8084-68a554b30a93}" Directory="VS2013ExtNuBuildV1Folder">
+            <Component Id="VS2013_NuBuild_Core_dll" Guid="{d3058dab-f2f5-476b-8084-68a554b30a93}" Directory="VS2013ExtNuBuildV2Folder">
                <File Id="VS2013_NuBuild_Core_dll" Source="..\Bin\NuBuild.Core.dll"/>
             </Component>
-            <Component Id="VS2013_NuBuild_Package_pkgdef" Guid="{ddbff02f-f44a-4a8c-885b-94449835ecf3}" Directory="VS2013ExtNuBuildV1Folder">
+            <Component Id="VS2013_NuBuild_Package_pkgdef" Guid="{ddbff02f-f44a-4a8c-885b-94449835ecf3}" Directory="VS2013ExtNuBuildV2Folder">
                <File Id="VS2013_NuBuild_Package_pkgdef" Source="..\Bin\VS\NuBuild.VS.Package.pkgdef"/>
             </Component>
-            <Component Id="VS2013_Extension_vsixmanifest" Guid="{145385ca-30d1-44a9-91fa-bbecc75d284e}" Directory="VS2013ExtNuBuildV1Folder">
+            <Component Id="VS2013_Extension_vsixmanifest" Guid="{145385ca-30d1-44a9-91fa-bbecc75d284e}" Directory="VS2013ExtNuBuildV2Folder">
                <File Id="VS2013_Extension_vsixmanifest" Source="..\Bin\VS\extension.vsixmanifest"/>
             </Component>
-            <Component Id="VS2013_license_txt" Guid="{b4216875-f791-49ed-9eb9-360fef79a40d}" Directory="VS2013ExtNuBuildV1ResourcesFolder">
+            <Component Id="VS2013_license_txt" Guid="{b4216875-f791-49ed-9eb9-360fef79a40d}" Directory="VS2013ExtNuBuildV2ResourcesFolder">
                <File Id="VS2013_license_txt" Source="..\Bin\VS\Resources\license.txt"/>
             </Component>
-            <Component Id="VS2013_NuBuild_png" Guid="{361bba1c-7469-4502-aea1-638454dfe546}" Directory="VS2013ExtNuBuildV1ResourcesFolder">
+            <Component Id="VS2013_NuBuild_png" Guid="{361bba1c-7469-4502-aea1-638454dfe546}" Directory="VS2013ExtNuBuildV2ResourcesFolder">
                <File Id="VS2013_NuBuild_png" Source="..\Bin\VS\Resources\nubuild.png"/>
             </Component>
-            <Component Id="VS2013_NuProj_zip" Guid="{1cc4ec22-bec9-460c-b664-f8231dbaa44c}" Directory="VS2013ExtNuBuildV1ProjectTemplatesFolder">
+            <Component Id="VS2013_NuProj_zip" Guid="{1cc4ec22-bec9-460c-b664-f8231dbaa44c}" Directory="VS2013ExtNuBuildV2ProjectTemplatesFolder">
                <File Id="VS2013_NuProj_zip" Source="..\Bin\VS\ProjectTemplates\NuProj.zip"/>
             </Component>
-            <Component Id="VS2013_NuSpec_zip" Guid="{c393cb41-a4bd-4816-89ff-227fdd27c344}" Directory="VS2013ExtNuBuildV1ItemTemplatesFolder">
+            <Component Id="VS2013_NuSpec_zip" Guid="{c393cb41-a4bd-4816-89ff-227fdd27c344}" Directory="VS2013ExtNuBuildV2ItemTemplatesFolder">
                <File Id="VS2013_NuSpec_zip" Source="..\Bin\VS\ItemTemplates\NuSpec.zip"/>
             </Component>
          </Feature>
