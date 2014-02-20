@@ -130,11 +130,12 @@ namespace NuBuild.MSBuild
                this.ReferenceLibraries = new ITaskItem[0];
             this.OutputPath = Path.GetFullPath(this.OutputPath);
             propertyProvider = new PropertyProvider(ProjectPath, ReferenceLibraries
-                .Where(libItem =>
-                {
-                    var copyLocal = libItem.GetMetadata("Private");
-                    return String.IsNullOrEmpty(copyLocal) || String.Compare(copyLocal, "false", true) != 0;
-                }).ToArray());
+               .Where(libItem =>
+               {
+                  var copyLocal = libItem.GetMetadata("Private");
+                  return !ProjectHelper.NuspecItem(libItem) &&
+                     (String.IsNullOrEmpty(copyLocal) || String.Compare(copyLocal, "false", true) != 0);
+               }).ToArray());
             Directory.CreateDirectory(this.OutputPath);
             // add build dependencies from the nuspec file(s)
             // and the list of project references
