@@ -131,15 +131,7 @@ namespace NuBuild.MSBuild
       private IEnumerable<string> ResolveNuTargets()
       {
          // MsBuild can't cache these projects (no binary output), these reference information are stored in intermediate files
-         var baseIntermediateOutputPath = project.GetPropertyValue("BaseIntermediateOutputPath");
-         if (string.IsNullOrEmpty(baseIntermediateOutputPath))
-            baseIntermediateOutputPath = @"obj\";
-         return System.IO.File.ReadAllLines(
-               Path.GetDirectoryName(project.FullPath) +
-               Path.DirectorySeparatorChar +
-               baseIntermediateOutputPath +
-               Path.GetFileNameWithoutExtension(project.FullPath) +
-               ".nupkgs")
+         return System.IO.File.ReadAllLines(ProjectHelper.GetNupkgsFullPath(project))
             .AsEnumerable();
       }
 

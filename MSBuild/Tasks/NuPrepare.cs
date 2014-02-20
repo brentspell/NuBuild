@@ -83,6 +83,11 @@ namespace NuBuild.MSBuild
       [Required]
       public String OutputPath { get; set; }
       /// <summary>
+      /// The project intermediate output directory path
+      /// </summary>
+      [Required]
+      public String IntermediateOutputPath { get; set; }
+      /// <summary>
       /// The project build number, or 0 to generate for auto-versioning
       /// </summary>
       public Int32 BuildNumber { get; set; }
@@ -151,6 +156,13 @@ namespace NuBuild.MSBuild
                PreparePackage(specItem);
             // add build dependencies from the embedded resource file(s)
             this.sourceList.AddRange(this.Embedded);
+            // write out .nupkgs intermediate file
+            // MsBuild can't cache these projects (no binary output), these reference information are stored in intermediate files
+            var nupkgsFullPath = ProjectHelper.GetNupkgsFullPath(ProjectPath, IntermediateOutputPath);
+            var nupkgsDirectory = Path.GetDirectoryName(nupkgsFullPath);
+            if (!Directory.Exists(nupkgsDirectory))
+               Directory.CreateDirectory(nupkgsDirectory);
+            System.IO.File.WriteAllLines(nupkgsFullPath, this.targetList.Select(ti => ti.GetMetadata("FullPath")), System.Text.Encoding.UTF8);
             // return the list of build sources/targets
             this.Prepared = this.preparedList.ToArray();
             this.Sources = this.sourceList.ToArray();

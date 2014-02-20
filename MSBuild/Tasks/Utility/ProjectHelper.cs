@@ -137,6 +137,22 @@ namespace NuBuild.MSBuild
             return Enumerable.Empty<string>();
       }
 
+      public static string GetNupkgsFullPath(Project project)
+      {
+         return GetNupkgsFullPath(project.FullPath, project.GetPropertyValue("BaseIntermediateOutputPath"));
+      }
+
+      public static string GetNupkgsFullPath(string projectFullPath, string baseIntermediateOutputPath)
+      {
+         if (string.IsNullOrEmpty(baseIntermediateOutputPath))
+            baseIntermediateOutputPath = @"obj\";
+         return Path.GetDirectoryName(projectFullPath) +
+            Path.DirectorySeparatorChar +
+            baseIntermediateOutputPath +
+            Path.GetFileNameWithoutExtension(projectFullPath) +
+            ".nupkgs";
+      }
+
       public static string GetSolutionDir(string projectDirectory)
       {
          var path = projectDirectory;

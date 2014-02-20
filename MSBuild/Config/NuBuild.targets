@@ -79,6 +79,7 @@
                  ProjectName="$(MSBuildProjectName)"
                  VersionSource="$(NuBuildVersionSource)"
                  VersionFileName="$(NuBuildVersionFileName)"
+                 IntermediateOutputPath="$(BaseIntermediateOutputPath)"
                  OutputPath="$(OutputPath)"
                  BuildNumber="$(BuildNumber)"
                  ReferenceLibraries="@(__ReferenceLibraries)">
@@ -86,10 +87,6 @@
          <Output TaskParameter="Sources" ItemName="NuSources"/>
          <Output TaskParameter="Targets" ItemName="NuTargets"/>
       </NuPrepare>
-      <WriteLinesToFile File="$(BaseIntermediateOutputPath)$(MSBuildProjectName).nupkgs"
-                        Lines="@(NuTargets)"
-                        Overwrite="true"
-                        Encoding="UTF-8"/>
       <ItemGroup>
          <NuSources Include="$(MSBuildProjectFile);"/>
       </ItemGroup>
