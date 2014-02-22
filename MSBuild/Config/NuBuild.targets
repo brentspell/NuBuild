@@ -111,6 +111,7 @@
            Inputs="@(NuSources)"
            Outputs="@(NuTargets)">
       <NuPackage ProjectPath="$(MSBuildProjectFullPath)"
+                 TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
                  NuSpec="@(NuPrepared)"
                  Embedded="@(EmbeddedResource)"
                  OutputPath="$(OutputPath)"

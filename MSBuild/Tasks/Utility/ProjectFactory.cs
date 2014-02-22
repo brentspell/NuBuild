@@ -236,20 +236,8 @@ namespace NuBuild.MSBuild
 
       public void CollectNuBuildDependencies(
          HashSet<ProjectFactory> nuBuildReferenceProjectFactories,
-         HashSet<FrameworkName> targetFrameworks,
-         Dictionary<FrameworkName, HashSet<string>> frameworkAssembliesByFramework,
-         Dictionary<FrameworkName, Dictionary<string, Tuple<IPackage, PackageDependency>>> packagesAndDependenciesByFramework,
          bool recursively)
       {
-         // Create/get target framework specific collections
-         if (targetFrameworks.Add(TargetFramework))
-         {
-            frameworkAssembliesByFramework.Add(TargetFramework,
-               new HashSet<string>(StringComparer.OrdinalIgnoreCase));
-            packagesAndDependenciesByFramework.Add(TargetFramework,
-               new Dictionary<string, Tuple<IPackage, PackageDependency>>());
-         }
-
          if (recursively)
             // get all packages and dependencies, including the ones in project references
             RecursivelyApplyOnProjectReferences(
