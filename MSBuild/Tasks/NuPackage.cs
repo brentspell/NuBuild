@@ -408,7 +408,7 @@ namespace NuBuild.MSBuild
             Debug.WriteLine(" removing referenced FrameworkAssemblies");
             foreach (var package in packages)
             {
-               Debug.WriteLine("  package: {0}", (object)package.Title);
+               Debug.WriteLine("  package: {0}", (object)(!string.IsNullOrEmpty(package.Title) ? package.Title : package.Id));
                foreach (var frameworkAssembly in package.FrameworkAssemblies)
                {
                   Debug.WriteLine("   ref: {0}", (object)frameworkAssembly.AssemblyName);
