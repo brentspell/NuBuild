@@ -206,8 +206,7 @@ namespace NuBuild.MSBuild
          HashSet<ProjectFactory> referenceProjectFactories,
          HashSet<FrameworkName> targetFrameworks,
          Dictionary<FrameworkName, HashSet<string>> frameworkAssembliesByFramework,
-         Dictionary<FrameworkName, Dictionary<string, Tuple<IPackage, PackageDependency>>> packagesAndDependenciesByFramework,
-         bool recursively)
+         Dictionary<FrameworkName, Dictionary<string, Tuple<IPackage, PackageDependency>>> packagesAndDependenciesByFramework)
       {
          // Create/get target framework specific collections
          HashSet<string> frameworkAssemblies;
@@ -225,49 +224,13 @@ namespace NuBuild.MSBuild
             packagesAndDependencies = packagesAndDependenciesByFramework[TargetFramework];
          }
 
-         if (recursively)
-            // get all packages and dependencies, including the ones in project references
-            RecursivelyApplyOnProjectReferences(
-               ProjectHelper.ValidItem,
-               p => p.AddDependencies(referenceProjectFactories, frameworkAssemblies, packagesAndDependencies));
-         else
-            AddDependencies(referenceProjectFactories, frameworkAssemblies, packagesAndDependencies);
+         AddDependencies(referenceProjectFactories, frameworkAssemblies, packagesAndDependencies);
       }
 
       public void CollectNuBuildDependencies(
-         HashSet<ProjectFactory> nuBuildReferenceProjectFactories,
-         bool recursively)
+         HashSet<ProjectFactory> nuBuildReferenceProjectFactories)
       {
-         if (recursively)
-            // get all packages and dependencies, including the ones in project references
-            RecursivelyApplyOnProjectReferences(
-               ProjectHelper.NuspecItem,
-               p => p.AddNuBuildDependencies(nuBuildReferenceProjectFactories));
-         else
-            AddNuBuildDependencies(nuBuildReferenceProjectFactories);
-      }
-
-      private void RecursivelyApplyOnProjectReferences(Predicate<string> predicate, Action<ProjectFactory> action)
-      {
-         var alreadyAppliedProjects = new HashSet<string>();
-         RecursivelyApplyOnProjectReferences(predicate, action, alreadyAppliedProjects);
-      }
-
-      private void RecursivelyApplyOnProjectReferences(Predicate<string> predicate, Action<ProjectFactory> action,
-         HashSet<string> alreadyAppliedProjects)
-      {
-         action(this);
-         alreadyAppliedProjects.Add(FullPath);
-         foreach (var fullPath in project
-            .GetItems(ProjectReferenceItemType)
-            .FullPath()
-            .Where(item => predicate(item))
-            .UnappliedItem(alreadyAppliedProjects))
-         {
-            var referencedProject = new ProjectFactory(fullPath);
-            referencedProject.TargetFramework = TargetFramework;
-            referencedProject.RecursivelyApplyOnProjectReferences(predicate, action, alreadyAppliedProjects);
-         }
+         AddNuBuildDependencies(nuBuildReferenceProjectFactories);
       }
 
       private void AddDependencies(
