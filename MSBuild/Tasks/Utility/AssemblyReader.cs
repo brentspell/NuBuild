@@ -84,6 +84,31 @@ namespace NuBuild.MSBuild
                AppDomain.Unload(domain);
          }
       }
+
+      /// <summary>
+      /// Initializes a new reader instance
+      /// </summary>
+      public AssemblyReader ()
+      {
+         AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += 
+            HandleReflectionOnlyAssemblyResolve;
+      }
+
+      /// <summary>
+      /// Reflection-only assembly load event handler
+      /// </summary>
+      /// <remarks>
+      /// This handler recursively loads assembly references that are not
+      /// loaded automatically during a reflection-only load
+      /// </remarks>
+      /// <param name="o"></param>
+      /// <param name="a"></param>
+      /// <returns></returns>
+      private static Assembly HandleReflectionOnlyAssemblyResolve (Object o, ResolveEventArgs a)
+      {
+         return Assembly.ReflectionOnlyLoad(a.Name);
+      }
+
       /// <summary>
       /// Retrieves the properties of an assembly from within
       /// the assembly's AppDomain
