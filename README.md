@@ -11,11 +11,11 @@ Download the latest [version](http://brentspell.com/download/NuBuild.msi) and ch
 * Generates package version numbers automatically from one of several sources
 
 ##Getting Started##
-![New Project](https://raw.github.com/wiki/bspell1/nubuild/newproj.png)
+![New Project](https://raw.github.com/bspell1/nubuild/wiki/newproj.png)
 
 Once you have installed NuGet and NuBuild, simply click **File**->**New Project**. Under **Installed Templates**, choose the **NuGet** category and the **NuGet Package** project type. This will add a NuBuild project to your solution.
 
-![Project Properties](https://raw.github.com/wiki/bspell1/nubuild/projprop.png)
+![Project Properties](https://raw.github.com/bspell1/nubuild/wiki/projprop.png)
 
 Right-click the project and select **Properties** to change the build configuration for your NuBuild project. Then, either edit the .nuspec file directly or use the excellent [NuGet Package Explorer](http://npe.codeplex.com/) to configure your package's properties.
 
