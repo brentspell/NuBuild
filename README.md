@@ -1,4 +1,4 @@
-![NuBuild](https://github.com/bspell1/NuBuild/raw/master/NuBuild.png) NuBuild
+![NuBuild](https://raw.githubusercontent.com/bspell1/NuBuild/master/NuBuild.png) NuBuild
 =========================================================================
 A NuGet project system for Visual Studio
 
@@ -11,11 +11,11 @@ Download the latest [version](http://brentspell.com/download/NuBuild.msi) and ch
 * Generates package version numbers automatically from one of several sources
 
 ##Getting Started##
-![New Project](https://github.com/bspell1/NuBuild/raw/master/newproj.png)
+![New Project](https://raw.githubusercontent.com/bspell1/NuBuild/master/newproj.png)
 
 Once you have installed NuGet and NuBuild, simply click **File**->**New Project**. Under **Installed Templates**, choose the **NuGet** category and the **NuGet Package** project type. This will add a NuBuild project to your solution.
 
-![Project Properties](https://github.com/bspell1/NuBuild/raw/master/projprop.png)
+![Project Properties](https://raw.githubusercontent.com/bspell1/NuBuild/master/projprop.png)
 
 Right-click the project and select **Properties** to change the build configuration for your NuBuild project. Then, either edit the .nuspec file directly or use the excellent [NuGet Package Explorer](http://npe.codeplex.com/) to configure your package's properties.
 
