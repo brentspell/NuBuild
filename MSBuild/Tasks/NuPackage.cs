@@ -29,283 +29,391 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+using System.Collections.ObjectModel;
 // Project References
 using NuGet;
+using System.Xml.Linq;
 
 namespace NuBuild.MSBuild
 {
-   /// <summary>
-   /// Package task
-   /// </summary>
-   /// <remarks>
-   /// This task compiles a set of .nuspec items into a corresponding set
-   /// of NuGet packages (.nupkg) files.
-   /// </remarks>
-   public sealed class NuPackage : Task, NuGet.IPropertyProvider
-   {
-      private Project propertyProject = null;
+    /// <summary>
+    /// Package task
+    /// </summary>
+    /// <remarks>
+    /// This task compiles a set of .nuspec items into a corresponding set
+    /// of NuGet packages (.nupkg) files.
+    /// </remarks>
+    public sealed class NuPackage : Task, NuGet.IPropertyProvider
+    {
+        private Project propertyProject = null;
+        private const string PACKAGES_CONFIG = "packages.config";
 
-      #region Task Parameters
-      /// <summary>
-      /// The full project path
-      /// </summary>
-      [Required]
-      public String ProjectPath { get; set; }
-      /// <summary>
-      /// The source .nuspec file items
-      /// </summary>
-      [Required]
-      public ITaskItem[] NuSpec { get; set; }
-      /// <summary>
-      /// The project output directory path
-      /// </summary>
-      [Required]
-      public String OutputPath { get; set; }
-      /// <summary>
-      /// The list of DLLs referenced by the current
-      /// NuGet project
-      /// </summary>
-      public ITaskItem[] ReferenceLibraries { get; set; }
-      /// <summary>
-      /// Specifies whether to add binaries (.dll and .exe files) from referenced projects into subfolders
-      /// (eg. lib\net40) based on TargetFrameworkVersion 
-      /// </summary>
-      public Boolean AddBinariesToSubfolder { get; set; }
-      /// <summary>
-      /// Specifies whether to add PDB files for binaries
-      /// automatically to the package
-      /// </summary>
-      public Boolean IncludePdbs { get; set; }
-      #endregion
+        #region Task Parameters
+        /// <summary>
+        /// The full project path
+        /// </summary>
+        [Required]
+        public String ProjectPath { get; set; }
+        /// <summary>
+        /// The source .nuspec file items
+        /// </summary>
+        [Required]
+        public ITaskItem[] NuSpec { get; set; }
+        /// <summary>
+        /// The project output directory path
+        /// </summary>
+        [Required]
+        public String OutputPath { get; set; }
+        /// <summary>
+        /// The list of DLLs referenced by the current
+        /// NuGet project
+        /// </summary>
+        public ITaskItem[] ReferenceLibraries { get; set; }
+        /// <summary>
+        /// Specifies whether to add binaries (.dll and .exe files) from referenced projects into subfolders
+        /// (eg. lib\net40) based on TargetFrameworkVersion 
+        /// </summary>
+        public Boolean AddBinariesToSubfolder { get; set; }
+        /// <summary>
+        /// Specifies whether to add PDB files for binaries
+        /// automatically to the package
+        /// </summary>
 
-      /// <summary>
-      /// Task execution override
-      /// </summary>
-      /// <returns>
-      /// True if successful
-      /// False otherwise
-      /// </returns>
-      public override Boolean Execute ()
-      {
-         try
-         {
-            // parepare the task for execution
-            if (this.ReferenceLibraries == null)
-               this.ReferenceLibraries = new ITaskItem[0];
-            this.OutputPath = Path.GetFullPath(this.OutputPath);
-            // compile the nuget package
-            foreach (var specItem in this.NuSpec)
-               BuildPackage(specItem);
-         }
-         catch (Exception e)
-         {
-            Log.LogError("{0} ({1})", e.Message, e.GetType().Name);
-            return false;
-         }
-         return true;
-      }
-      /// <summary>
-      /// Compiles a single .nuspec file
-      /// </summary>
-      /// <param name="specItem">
-      /// The .nuspec file to compile
-      /// </param>
-      private void BuildPackage (ITaskItem specItem)
-      {
-         // load the package manifest (nuspec) from the task item
-         // using the nuget package builder
-         var specPath = specItem.GetMetadata("FullPath");
-         var builder = new NuGet.PackageBuilder(
-            specPath,
-            this as NuGet.IPropertyProvider,
-            true
-         );
-         // initialize dynamic manifest properties
-         var version = specItem.GetMetadata("NuPackageVersion");
-         if (!String.IsNullOrEmpty(version))
-            builder.Version = new NuGet.SemanticVersion(version);
-         // add a new file to the folder for each project
-         // referenced by the current project
-         AddLibraries(builder);
-         // write the configured package out to disk
-         var pkgPath = specItem.GetMetadata("NuPackagePath");
-         using (var pkgFile = File.Create(pkgPath))
-            builder.Save(pkgFile);
-      }
-      /// <summary>
-      /// Adds project references to the package lib section
-      /// </summary>
-      /// <param name="builder">
-      /// The current package builder
-      /// </param>
-      private void AddLibraries (NuGet.PackageBuilder builder)
-      {
-         // add package files from project references
-         // . DLL references go in the lib package folder
-         // . EXE references go in the tools package folder
-         // . everything else goes in the content package folder
-         // . folders may be overridden using NuBuildTargetFolder metadata (lib\net40, etc.)
-         // . folders may be overridden using TargetFramework attribute (lib\net40, etc.)
-         foreach (var libItem in this.ReferenceLibraries)
-         {
-            var srcPath = libItem.GetMetadata("FullPath");
-            var srcExt = Path.GetExtension(srcPath).ToLower();
-            var tgtFolder = "content";
-            var hasPdb = false;
-            if (srcExt == ".dll")
-            {
-               tgtFolder = "lib";
-               hasPdb = true;
-            }
-            else if (srcExt == ".exe")
-            {
-               tgtFolder = "tools";
-               hasPdb = true;
-            }
-            // apply the custom folder override on the reference, or based on TargetFramework
-            var customFolder = libItem.GetMetadata("NuBuildTargetFolder");
-            if (!String.IsNullOrWhiteSpace(customFolder))
-               tgtFolder = customFolder;
-            else if (AddBinariesToSubfolder)
-               try
-               {
-                  var targetFrameworkName = AssemblyReader.Read(srcPath).TargetFrameworkName;
-                  if (!String.IsNullOrWhiteSpace(targetFrameworkName))
-                     tgtFolder = Path.Combine(tgtFolder, VersionUtility.GetShortFrameworkName(new FrameworkName(targetFrameworkName)));
-               }
-               catch { }
-            // add the source library file to the package
-            builder.Files.Add(
-               new NuGet.PhysicalPackageFile()
-               {
-                  SourcePath = srcPath,
-                  TargetPath = String.Format(
-                     @"{0}\{1}",
-                     tgtFolder,
-                     Path.GetFileName(srcPath)
-                  )
-               }
-            );
-            // add PDBs if specified and exist
-            if (hasPdb && this.IncludePdbs)
-            {
-               var pdbPath = Path.ChangeExtension(srcPath, ".pdb");
-               if (File.Exists(pdbPath))
-                  builder.Files.Add(
-                     new NuGet.PhysicalPackageFile()
-                     {
-                        SourcePath = pdbPath,
-                        TargetPath = String.Format(
-                           @"{0}\{1}",
-                           tgtFolder,
-                           Path.GetFileName(pdbPath)
-                        )
-                     }
-                  );
-            }
-         }
-      }
-      /// <summary>
-      /// Retrieves a property from the current NuGet project file
-      /// </summary>
-      /// <param name="name">
-      /// The name of the property to retrieve
-      /// </param>
-      /// <returns>
-      /// The specified property value if found
-      /// Null otherwise
-      /// </returns>
-      private String GetProjectProperty (String name)
-      {
-         // attempt to resolve the requested property
-         // from the project properties
-         if (this.propertyProject == null)
-         {
-            // attempt to retrieve the project from the global collection
-            // this should always work in Visual Studio
-            this.propertyProject = ProjectCollection
-               .GlobalProjectCollection
-               .LoadedProjects
-               .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.FullPath, this.ProjectPath) == 0)
-               .FirstOrDefault();
-            //---------------------------------------------------------------
-            // HACK: bspell - 6/25/2013
-            // . unfortunately, MSBuild does not maintain the current project
-            //   in the global project collection, nor does it expose the
-            //   global properties collection for generic property retrieval
-            // . retrieve the build parameters here using reflection to
-            //   get the global MSBuild properties collection and load the
-            //   project manually
-            // . accessing private members using reflection is awful, but the
-            //   alternative would be to pass in all possible MSBuild 
-            //   properties to the custom task, which wouldn't even work for
-            //   application-specific properties
-            // . this method may be incompatible with future versions of 
-            //   MSBuild
-            //---------------------------------------------------------------
-            if (this.propertyProject == null)
-            {
-               var prop = BuildManager.DefaultBuildManager.GetType().GetProperty(
-                  "Microsoft.Build.BackEnd.IBuildComponentHost.BuildParameters", 
-                  BindingFlags.Instance | BindingFlags.NonPublic
-               );
-               if (prop == null)
-                  throw new NotSupportedException("Unable to retrieve MSBuild parameters using reflection");
-               var param = (BuildParameters)prop
-                  .GetValue(BuildManager.DefaultBuildManager, null);
-               this.propertyProject = ProjectCollection.GlobalProjectCollection
-                  .LoadProject(
-                     this.ProjectPath, 
-                     param.GlobalProperties, 
-                     ProjectCollection.GlobalProjectCollection.DefaultToolsVersion
-                  );
-            }
-         }
-         if (this.propertyProject != null)
-            return this.propertyProject.AllEvaluatedProperties
-               .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.Name, name) == 0)
-               .Select(p => p.EvaluatedValue)
-               .FirstOrDefault();
-         return null;
-      }
 
-      #region IPropertyProvider Implementation
-      /// <summary>
-      /// Retrieves nuget replacement values from a referenced
-      /// assembly library or MSBuild property, as specified here:
-      /// http://docs.nuget.org/docs/reference/nuspec-reference#Replacement_Tokens
-      /// </summary>
-      /// <param name="property">
-      /// The replacement property to retrieve
-      /// </param>
-      /// <returns>
-      /// The replacement property value
-      /// </returns>
-      public dynamic GetPropertyValue (String property)
-      {
-         // attempt to resolve the property from the referenced libraries
-         foreach (var libItem in this.ReferenceLibraries)
-         {
+        /// <summary>
+        /// If nuspec dependencies is not defined, creates it based on project packages.config file.
+        /// </summary>
+        public Boolean AutoGenerateDependencies { get; set; }
+        public Boolean IncludePdbs { get; set; }
+        #endregion
+
+        /// <summary>
+        /// Task execution override
+        /// </summary>
+        /// <returns>
+        /// True if successful
+        /// False otherwise
+        /// </returns>
+        public override Boolean Execute()
+        {
             try
             {
-               var props = AssemblyReader.Read(libItem.GetMetadata("FullPath"));
-               if (property == "id")
-                  return props.Name;
-               if (property == "version" && props.Version != null)
-                  return props.Version.ToString();
-               if (property == "description")
-                  return props.Description;
-               if (property == "copyright")
-                  return props.Copyright;
-               if (property == "author")
-                  return props.Company;
+                // parepare the task for execution
+                if (this.ReferenceLibraries == null)
+                    this.ReferenceLibraries = new ITaskItem[0];
+                this.OutputPath = Path.GetFullPath(this.OutputPath);
+                // compile the nuget package
+                foreach (var specItem in this.NuSpec)
+                    BuildPackage(specItem);
             }
-            catch { }
-         }
-         // if the property was not yet resolved, retrieve it
-         // from the project properties
-         return GetProjectProperty(property);
-      }
-      #endregion
-   }
+            catch (Exception e)
+            {
+                Log.LogError("{0} ({1})", e.Message, e.GetType().Name);
+                return false;
+            }
+            return true;
+        }
+        /// <summary>
+        /// Compiles a single .nuspec file
+        /// </summary>
+        /// <param name="specItem">
+        /// The .nuspec file to compile
+        /// </param>
+        private void BuildPackage(ITaskItem specItem)
+        {
+            // load the package manifest (nuspec) from the task item
+            // using the nuget package builder
+            var specPath = specItem.GetMetadata("FullPath");
+            var builder = new NuGet.PackageBuilder(
+               specPath,
+               this as NuGet.IPropertyProvider,
+               true
+            );
+            // initialize dynamic manifest properties
+            var version = specItem.GetMetadata("NuPackageVersion");
+            if (!String.IsNullOrEmpty(version))
+                builder.Version = new NuGet.SemanticVersion(version);
+            // add a new file to the folder for each project
+            // referenced by the current project
+            AddLibraries(builder);
+
+            //auto generate package dependencies from packages.config file.
+            if (AutoGenerateDependencies && !builder.DependencySets.Any())
+                AddDependencies(builder);
+
+
+            // write the configured package out to disk
+            var pkgPath = specItem.GetMetadata("NuPackagePath");
+            using (var pkgFile = File.Create(pkgPath))
+                builder.Save(pkgFile);
+        }
+
+        /// <summary>
+        /// Go through each referenced project, and add any nuget dependencies from 
+        /// their packages.config file.  Ignores any that have developerDependency=true
+        /// </summary>
+        /// <param name="builder"></param>
+        private void AddDependencies(NuGet.PackageBuilder builder)
+        {
+            Dictionary<string, string> NugetPackages = new Dictionary<string, string>();
+
+            string projectRoot = Path.GetDirectoryName(this.ProjectPath);
+
+            XElement root = XElement.Load(this.ProjectPath);
+            var ns = root.Name.Namespace;
+            var elems = (from el in root.Descendants(ns + "ProjectReference")
+                         select el).ToList();
+
+            if (elems.Any())
+            {
+                foreach (var item in elems)
+                {
+                    string itemPath = item.Attribute("Include").Value;
+                    string packagesPath = Path.GetFullPath(Path.Combine(projectRoot, Path.GetDirectoryName(itemPath))) + Path.DirectorySeparatorChar + PACKAGES_CONFIG;
+                    GetNuGetDependencies(packagesPath, NugetPackages);
+                }
+            }
+
+            if (NugetPackages.Any())
+                AddNugetDependencies(builder, NugetPackages);
+        }
+
+        /// <summary>
+        /// Inserts a dependency set into the packagebuilder object, based on a dictionary
+        /// containing Id/version pairs (Newtonsoft.json, 5.0.6 for example).
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="packages"></param>
+        private void AddNugetDependencies(NuGet.PackageBuilder builder, Dictionary<string, string> packages)
+        {
+            //add dependencies
+            List<PackageDependency> dependencies = new List<PackageDependency>();
+            foreach (var package in packages)
+            {
+                dependencies.Add(new PackageDependency(package.Key, new VersionSpec { MinVersion = new SemanticVersion(package.Value), IsMinInclusive = true }));
+            }
+
+            var set = new PackageDependencySet(null, dependencies);
+            builder.DependencySets.Add(set);
+        }
+
+        /// <summary>
+        /// opens a packages.config file (if exists) and parses the nuget packages into a dictionary.
+        /// dictionary key is the package id (ie, newtownsoft.json), and version is the semantic version string (ie 5.0.6)
+        /// if there are 2 csproj's linked to the same nuproj, this also verifies that any shared packages share the same version.
+        /// if they do not, throws an exception and stops.
+        /// </summary>
+        /// <param name="packagesPath"></param>
+        /// <param name="packages"></param>
+        private void GetNuGetDependencies(string packagesPath, Dictionary<string, string> packages)
+        {
+            if (!File.Exists(packagesPath)) return; //packages.config is not there, no nuget packages in project.
+
+            XElement root = XElement.Load(packagesPath);
+            var elems = from el in root.Elements("package")
+                        where el.Attribute("developmentDependency") == null || (string)el.Attribute("developmentDependency") == "false"
+                        select el;
+
+            foreach (var item in elems)
+            {
+                var id = item.Attribute("id").Value;
+                var version = item.Attribute("version").Value;
+
+                if (packages.ContainsKey(id))
+                {
+                    //if version is the same, ok, but if different, then that means the same package
+                    //is referenced with 2 different versions.  (most likely from 2 different .csproj's linked in one nuproj,
+                    //and not utilizing the same version of the nuget package.  
+                    if (packages[id] != version)
+                    {
+                        Log.LogError(
+                            "package {0} is referenced twice, with different versions.  Cannot proceed with the auto generation of dependencies.  Please update to use the same version or manually create the dependencies in the nuspec file.  Versions detected: {1}, {2}",
+                            id, packages[id], version);
+                        throw new Exception("Could not auto-generate dependencies due to multiple versions of same package.");
+                    }
+                }
+                else
+                {
+                    packages.Add(id, version);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Adds project references to the package lib section
+        /// </summary>
+        /// <param name="builder">
+        /// The current package builder
+        /// </param>
+        private void AddLibraries(NuGet.PackageBuilder builder)
+        {
+            // add package files from project references
+            // . DLL references go in the lib package folder
+            // . EXE references go in the tools package folder
+            // . everything else goes in the content package folder
+            // . folders may be overridden using NuBuildTargetFolder metadata (lib\net40, etc.)
+            // . folders may be overridden using TargetFramework attribute (lib\net40, etc.)
+            foreach (var libItem in this.ReferenceLibraries)
+            {
+                var srcPath = libItem.GetMetadata("FullPath");
+                var srcExt = Path.GetExtension(srcPath).ToLower();
+                var tgtFolder = "content";
+                var hasPdb = false;
+                if (srcExt == ".dll")
+                {
+                    tgtFolder = "lib";
+                    hasPdb = true;
+                }
+                else if (srcExt == ".exe")
+                {
+                    tgtFolder = "tools";
+                    hasPdb = true;
+                }
+                // apply the custom folder override on the reference, or based on TargetFramework
+                var customFolder = libItem.GetMetadata("NuBuildTargetFolder");
+                if (!String.IsNullOrWhiteSpace(customFolder))
+                    tgtFolder = customFolder;
+                else if (AddBinariesToSubfolder)
+                    try
+                    {
+                        var targetFrameworkName = AssemblyReader.Read(srcPath).TargetFrameworkName;
+                        if (!String.IsNullOrWhiteSpace(targetFrameworkName))
+                            tgtFolder = Path.Combine(tgtFolder, VersionUtility.GetShortFrameworkName(new FrameworkName(targetFrameworkName)));
+                    }
+                    catch { }
+                // add the source library file to the package
+                builder.Files.Add(
+                   new NuGet.PhysicalPackageFile()
+                   {
+                       SourcePath = srcPath,
+                       TargetPath = String.Format(
+                          @"{0}\{1}",
+                          tgtFolder,
+                          Path.GetFileName(srcPath)
+                       )
+                   }
+                );
+                // add PDBs if specified and exist
+                if (hasPdb && this.IncludePdbs)
+                {
+                    var pdbPath = Path.ChangeExtension(srcPath, ".pdb");
+                    if (File.Exists(pdbPath))
+                        builder.Files.Add(
+                           new NuGet.PhysicalPackageFile()
+                           {
+                               SourcePath = pdbPath,
+                               TargetPath = String.Format(
+                                  @"{0}\{1}",
+                                  tgtFolder,
+                                  Path.GetFileName(pdbPath)
+                               )
+                           }
+                        );
+                }
+            }
+        }
+        /// <summary>
+        /// Retrieves a property from the current NuGet project file
+        /// </summary>
+        /// <param name="name">
+        /// The name of the property to retrieve
+        /// </param>
+        /// <returns>
+        /// The specified property value if found
+        /// Null otherwise
+        /// </returns>
+        private String GetProjectProperty(String name)
+        {
+            // attempt to resolve the requested property
+            // from the project properties
+            if (this.propertyProject == null)
+            {
+                // attempt to retrieve the project from the global collection
+                // this should always work in Visual Studio
+                this.propertyProject = ProjectCollection
+                   .GlobalProjectCollection
+                   .LoadedProjects
+                   .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.FullPath, this.ProjectPath) == 0)
+                   .FirstOrDefault();
+                //---------------------------------------------------------------
+                // HACK: bspell - 6/25/2013
+                // . unfortunately, MSBuild does not maintain the current project
+                //   in the global project collection, nor does it expose the
+                //   global properties collection for generic property retrieval
+                // . retrieve the build parameters here using reflection to
+                //   get the global MSBuild properties collection and load the
+                //   project manually
+                // . accessing private members using reflection is awful, but the
+                //   alternative would be to pass in all possible MSBuild 
+                //   properties to the custom task, which wouldn't even work for
+                //   application-specific properties
+                // . this method may be incompatible with future versions of 
+                //   MSBuild
+                //---------------------------------------------------------------
+                if (this.propertyProject == null)
+                {
+                    var prop = BuildManager.DefaultBuildManager.GetType().GetProperty(
+                       "Microsoft.Build.BackEnd.IBuildComponentHost.BuildParameters",
+                       BindingFlags.Instance | BindingFlags.NonPublic
+                    );
+                    if (prop == null)
+                        throw new NotSupportedException("Unable to retrieve MSBuild parameters using reflection");
+                    var param = (BuildParameters)prop
+                       .GetValue(BuildManager.DefaultBuildManager, null);
+                    this.propertyProject = ProjectCollection.GlobalProjectCollection
+                       .LoadProject(
+                          this.ProjectPath,
+                          param.GlobalProperties,
+                          ProjectCollection.GlobalProjectCollection.DefaultToolsVersion
+                       );
+                }
+            }
+            if (this.propertyProject != null)
+                return this.propertyProject.AllEvaluatedProperties
+                   .Where(p => StringComparer.OrdinalIgnoreCase.Compare(p.Name, name) == 0)
+                   .Select(p => p.EvaluatedValue)
+                   .FirstOrDefault();
+            return null;
+        }
+
+        #region IPropertyProvider Implementation
+        /// <summary>
+        /// Retrieves nuget replacement values from a referenced
+        /// assembly library or MSBuild property, as specified here:
+        /// http://docs.nuget.org/docs/reference/nuspec-reference#Replacement_Tokens
+        /// </summary>
+        /// <param name="property">
+        /// The replacement property to retrieve
+        /// </param>
+        /// <returns>
+        /// The replacement property value
+        /// </returns>
+        public dynamic GetPropertyValue(String property)
+        {
+            // attempt to resolve the property from the referenced libraries
+            foreach (var libItem in this.ReferenceLibraries)
+            {
+                try
+                {
+                    var props = AssemblyReader.Read(libItem.GetMetadata("FullPath"));
+                    if (property == "id")
+                        return props.Name;
+                    if (property == "version" && props.Version != null)
+                        return props.Version.ToString();
+                    if (property == "description")
+                        return props.Description;
+                    if (property == "copyright")
+                        return props.Copyright;
+                    if (property == "author")
+                        return props.Company;
+                }
+                catch { }
+            }
+            // if the property was not yet resolved, retrieve it
+            // from the project properties
+            return GetProjectProperty(property);
+        }
+        #endregion
+    }
 }

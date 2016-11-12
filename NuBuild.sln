@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{5CB348A3-A73A-43CB-8CF9-AC9CD06B6DEA}"
 	ProjectSection(SolutionItems) = preProject
 		license.txt = license.txt
@@ -23,6 +25,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{5D0516
 		MSBuild\Config\NuBuild.tasks = MSBuild\Config\NuBuild.tasks
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{29F508AD-7D2D-45CF-A14E-264487A290D6}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Package", "VS\Package\Package.csproj", "{1E196872-CD2A-41DC-AFDB-4CF0B34EEB26}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A0B266F8-F6A5-4A13-9403-F2E07B963F21} = {A0B266F8-F6A5-4A13-9403-F2E07B963F21}
@@ -41,13 +50,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasks", "MSBuild\Tasks\Tasks.csproj", "{A0B266F8-F6A5-4A13-9403-F2E07B963F21}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{DF1AC33F-7D8D-473C-AD88-2CA4EDAD3B70}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{29F508AD-7D2D-45CF-A14E-264487A290D6}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,10 +86,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{5D0516F3-0DC5-4382-8C10-55A3088C3D31} = {D7419DD1-E3EC-4E82-80A1-BE293E3E67D6}
 		{1E196872-CD2A-41DC-AFDB-4CF0B34EEB26} = {C24B7D6C-4641-4065-8912-2B2DB61D850C}
 		{8E6F74CF-7D2C-4BDC-979B-23654E2B9587} = {C24B7D6C-4641-4065-8912-2B2DB61D850C}
 		{6045E4AC-6183-42B4-9880-AD01F46A36ED} = {C24B7D6C-4641-4065-8912-2B2DB61D850C}
-		{5D0516F3-0DC5-4382-8C10-55A3088C3D31} = {D7419DD1-E3EC-4E82-80A1-BE293E3E67D6}
 		{A0B266F8-F6A5-4A13-9403-F2E07B963F21} = {D7419DD1-E3EC-4E82-80A1-BE293E3E67D6}
 	EndGlobalSection
 EndGlobal
